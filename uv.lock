@@ -808,11 +808,11 @@ ui = [
 
 [package.metadata]
 requires-dist = [
-    { name = "marimo", marker = "extra == 'ui'", specifier = ">=0.9" },
+    { name = "marimo", marker = "extra == 'ui'", specifier = ">=0.23" },
     { name = "mypy", marker = "extra == 'dev'" },
-    { name = "numpy", specifier = ">=2.0" },
-    { name = "pandas", specifier = ">=2.2" },
-    { name = "plotly", specifier = ">=5.22" },
+    { name = "numpy", specifier = ">=2.4" },
+    { name = "pandas", specifier = ">=3.0" },
+    { name = "plotly", specifier = ">=6.0" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0" },
     { name = "ruff", marker = "extra == 'dev'" },
 ]

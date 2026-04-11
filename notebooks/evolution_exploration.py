@@ -1,7 +1,7 @@
 import marimo
 
 __generated_with = "0.9.0"
-app = marimo.App(width="wide", title="Evolution — Population Genetics")
+app = marimo.App(width="wide")
 
 
 @app.cell
