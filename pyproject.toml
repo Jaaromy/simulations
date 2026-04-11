@@ -1,0 +1,35 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "simulations"
+version = "0.1.0"
+description = "Multi-domain simulation framework"
+requires-python = ">=3.12"
+dependencies = [
+    "numpy>=2.0",
+    "pandas>=2.2",
+    "plotly>=5.22",
+]
+
+[project.optional-dependencies]
+ui = ["marimo>=0.9"]
+dev = ["pytest>=8.0", "ruff", "mypy"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/simulations"]
+
+[tool.ruff]
+src = ["src"]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
