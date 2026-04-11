@@ -23,20 +23,20 @@ def _(mo):
         label='Generations <abbr title="Total discrete time steps. Each generation applies births, deaths, and density-dependent regulation once.">[?]</abbr>',
     )
     initial_population = mo.ui.number(
-        start=10, stop=10000, step=10, value=1000,
-        label='Initial Population <abbr title="Population size at generation 0. Start far from carrying capacity to see the approach to equilibrium.">[?]</abbr>',
+        start=10, stop=10000, step=10, value=100,
+        label='Initial Population <abbr title="Population size at generation 0. Start far below carrying capacity to see the full S-curve approach to equilibrium.">[?]</abbr>',
     )
     birth_rate = mo.ui.slider(
-        start=0.01, stop=0.5, step=0.01, value=0.1,
-        label='Birth Rate <abbr title="Per-individual probability of producing one offspring per generation. Net growth = birth_rate − death_rate when N ≪ K.">[?]</abbr>',
+        start=0.01, stop=0.5, step=0.01, value=0.15,
+        label='Birth Rate <abbr title="Per-individual probability of producing one offspring per generation. Net intrinsic growth rate r = birth_rate − death_rate.">[?]</abbr>',
     )
     death_rate = mo.ui.slider(
-        start=0.01, stop=0.5, step=0.01, value=0.08,
+        start=0.01, stop=0.5, step=0.01, value=0.05,
         label='Death Rate <abbr title="Per-individual probability of dying per generation. When death_rate ≥ birth_rate the population declines to zero regardless of K.">[?]</abbr>',
     )
     carrying_capacity = mo.ui.number(
         start=100, stop=50000, step=100, value=5000,
-        label='Carrying Capacity <abbr title="Maximum sustainable population K. Equilibrium N* = K·(b−d)/(b+d). Density-dependent feedback raises effective death rate as N→K.">[?]</abbr>',
+        label='Carrying Capacity <abbr title="Maximum sustainable population K. Equilibrium N* = K exactly. Density-dependent feedback raises effective death rate as N→K.">[?]</abbr>',
     )
     n_runs = mo.ui.slider(
         start=1, stop=20, step=1, value=5,

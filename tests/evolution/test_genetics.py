@@ -6,27 +6,30 @@ Three layers of coverage:
   2. Limit cases           — deterministic bounds that require no statistics.
   3. Theory cross-validation — observed mean within 5 SE of closed-form N*.
 
+Model formulation
+-----------------
+    effective_birth = b                              (constant)
+    effective_death = d + (b − d) · N/K             (density-dependent)
+
+Fixed point: b = d + (b−d)·N*/K  →  N* = K.
+
 SE derivation for theory test
 ------------------------------
-The fixed point of the logistic model:
+At N* = K, λ_births = b·K and λ_deaths = b·K, so per-step variance:
 
-    N* = K · (b − d) / (b + d)
+    Var(ΔN) = b·K + b·K = 2bK
 
-At N*, both effective rates equal 2bd/(b+d), so per-step variance of ΔN is:
+Drift linearised around N* (net growth = r·N·(1−N/K), r = b−d):
 
-    Var(ΔN) = (eff_birth + eff_death) · N*
-            = 4bd/(b+d) · K(b−d)/(b+d)
-            = 4bdK(b−d) / (b+d)²
+    α = restoring rate = r = b − d
 
-The stationary variance of N around N* (Ornstein-Uhlenbeck approximation):
+Stationary variance (Ornstein-Uhlenbeck approximation):
 
-    Var_stat ≈ Var(ΔN) / (2α),  where α = b − d  (restoring rate)
-             = 2bdK / (b+d)²
+    Var_stat ≈ Var(ΔN) / (2α) = 2bK / (2r) = bK / r
 
-Correlation time τ ≈ 1/α steps.  Effective independent samples from n_runs
-runs each averaged over a window of w steps:
+Correlation time τ ≈ 1/α = 1/r steps.  Effective independent samples:
 
-    n_eff = n_runs · w / τ = n_runs · w · (b − d)
+    n_eff = n_runs · window / τ = n_runs · window · r
 
 SE of grand mean = sqrt(Var_stat / n_eff).
 """
@@ -124,34 +127,35 @@ def test_population_monotone_from_below_carrying_capacity(sim: GeneticsSimulatio
 
 def test_equilibrium_near_theoretical_fixed_point(sim: GeneticsSimulation) -> None:
     """
-    Fixed point: N* = K·(b−d)/(b+d) ≈ 556 for the parameters below.
+    Fixed point: N* = K = 5000 for the parameters below.
 
     Tolerance is derived analytically — not chosen arbitrarily:
-        Var_stat  = 2·b·d·K / (b+d)²         (stationary variance, O-U approx)
-        τ         = 1/(b−d)                    (correlation time in steps)
-        n_eff     = n_runs · window · (b−d)    (effective independent samples)
+        Var_stat  = b·K / r               (stationary variance, O-U approx, r = b−d)
+        τ         = 1/r                   (correlation time in steps)
+        n_eff     = n_runs · window / τ   (effective independent samples)
         SE        = sqrt(Var_stat / n_eff)
         tolerance = 5 · SE
 
-    With the parameters below: SE ≈ 5.0, tolerance ≈ 25 (≈ ±4.5% of N*).
+    With the parameters below: SE ≈ 15.8, tolerance ≈ 79 (≈ ±1.6% of N*).
     """
     K = 5000
     b, d = 0.10, 0.08
+    r = b - d
     n_runs = 50
     n_generations = 500
-    n_star = K * (b - d) / (b + d)  # = 5000·0.02/0.18 ≈ 555.6
+    n_star = float(K)  # N* = K exactly
 
     # Analytically derived SE (see module docstring for full derivation)
-    var_stat = 2 * b * d * K / (b + d) ** 2      # ≈ 2469
+    var_stat = b * K / r                          # = 25000
     window = int(n_generations * 0.2)             # = 100 steps
-    tau = 1.0 / (b - d)                           # = 50 steps
-    n_eff = n_runs * window / tau                  # = 100 effective samples
-    se = np.sqrt(var_stat / n_eff)                 # ≈ 4.97
-    tolerance = 5 * se                             # ≈ 24.9
+    tau = 1.0 / r                                 # = 50 steps
+    n_eff = n_runs * window / tau                 # = 100 effective samples
+    se = np.sqrt(var_stat / n_eff)                # ≈ 15.81
+    tolerance = 5 * se                            # ≈ 79
 
     params = GeneticsParams(
         n_generations=n_generations,
-        initial_population=500,
+        initial_population=100,
         birth_rate=b,
         death_rate=d,
         carrying_capacity=K,
@@ -179,10 +183,10 @@ def test_single_step_exact_arithmetic() -> None:
 
     Manual derivation:
         density          = 500 / 5000 = 0.10
-        effective_birth  = 0.10 × (1 − 0.10) = 0.09
-        effective_death  = 0.08 × (1 + 0.10) = 0.088
-        λ_births         = 0.09 × 500 = 45.0
-        λ_deaths         = 0.088 × 500 = 44.0
+        effective_birth  = 0.10                          (constant, no density term)
+        effective_death  = 0.08 + (0.10 − 0.08) × 0.10 = 0.082
+        λ_births         = 0.10 × 500 = 50.0
+        λ_deaths         = 0.082 × 500 = 41.0
         births (mocked)  = 40
         deaths (mocked)  = 30
         new population   = max(500 + 40 − 30, 0) = 510
@@ -215,8 +219,8 @@ def test_single_step_exact_arithmetic() -> None:
     )
     # Confirm the correct λ values were passed to the RNG (float-exact comparison)
     calls = [c.args[0] for c in mock_rng.poisson.call_args_list]
-    np.testing.assert_allclose(calls, [45.0, 44.0], rtol=1e-12, err_msg=(
-        f"Expected Poisson calls [45.0, 44.0] but got {calls}"
+    np.testing.assert_allclose(calls, [50.0, 41.0], rtol=1e-12, err_msg=(
+        f"Expected Poisson calls [50.0, 41.0] but got {calls}"
     ))
 
 

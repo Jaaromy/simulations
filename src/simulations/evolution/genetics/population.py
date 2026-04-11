@@ -36,8 +36,8 @@ class GeneticsSimulation(Simulation[GeneticsParams, TimeSeriesResult]):
 
             # Logistic scaling: growth slows as population approaches K
             density = population / params.carrying_capacity
-            effective_birth = params.birth_rate * (1.0 - density)
-            effective_death = params.death_rate * (1.0 + density)
+            effective_birth = params.birth_rate
+            effective_death = params.death_rate + (params.birth_rate - params.death_rate) * density
 
             births = rng.poisson(max(effective_birth * population, 0))
             deaths = rng.poisson(max(effective_death * population, 0))
