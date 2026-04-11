@@ -27,21 +27,32 @@ def _(mo):
 @app.cell
 def _(mo):
     n_rounds = mo.ui.slider(
-        start=100, stop=500_000, step=100, value=1_000, label="Rounds / Hands / Spins"
+        start=100, stop=500_000, step=100, value=1_000,
+        label='Rounds / Hands / Spins <abbr title="How many rounds each player plays per run. More rounds let the house edge grind the bankroll; short sessions show high variance.">[?]</abbr>',
     )
     initial_bankroll = mo.ui.number(
-        start=100, stop=10000, step=100, value=1000, label="Initial Bankroll ($)"
+        start=100, stop=10000, step=100, value=1000,
+        label='Initial Bankroll ($) <abbr title="Starting funds per simulated player (dashed line on chart). Smaller bankrolls ruin faster against the same house edge.">[?]</abbr>',
     )
     bet_size = mo.ui.number(
-        start=1, stop=200, step=1, value=10, label="Bet Size ($)"
+        start=1, stop=200, step=1, value=10,
+        label='Bet Size ($) <abbr title="Flat bet per round. Expected loss per round = bet_size × house_edge. Larger bets amplify both wins and losses proportionally.">[?]</abbr>',
     )
     n_runs = mo.ui.slider(
-        start=1, stop=50, step=1, value=10, label="Simulation Runs (per game)"
+        start=1, stop=50, step=1, value=10,
+        label='Simulation Runs (per game) <abbr title="Independent player trajectories per game. More runs narrow the mean estimate and expose ruin probability.">[?]</abbr>',
     )
-    use_basic_strategy = mo.ui.checkbox(value=True, label="Blackjack: Use Basic Strategy")
-    use_hilo = mo.ui.checkbox(value=False, label="Blackjack: Hi/Lo Card Counting (requires basic strategy)")
+    use_basic_strategy = mo.ui.checkbox(
+        value=True,
+        label='Blackjack: Use Basic Strategy <abbr title="Optimal hit/stand/double/split for every hand. Cuts house edge from ~2% (guessing) to ~0.5%.">[?]</abbr>',
+    )
+    use_hilo = mo.ui.checkbox(
+        value=False,
+        label='Blackjack: Hi/Lo Card Counting (requires basic strategy) <abbr title="Track high vs low cards remaining. Raise bets when count favours the player. Requires basic strategy; can flip edge slightly positive at high counts.">[?]</abbr>',
+    )
     hilo_max_bet_units = mo.ui.slider(
-        start=2, stop=16, step=1, value=8, label="Hi/Lo Max Bet Units"
+        start=2, stop=16, step=1, value=8,
+        label='Hi/Lo Max Bet Units <abbr title="Bet ceiling as a multiple of base bet when count is strongly positive. Higher spread = more edge but more variance.">[?]</abbr>',
     )
     run_button = mo.ui.run_button(label="Run simulation")
 
