@@ -83,9 +83,26 @@ def _(bet_size, hilo_max_bet_units, initial_bankroll, mo, n_rounds, n_runs, run_
         bet_size=bet_size.value,
     )
 
-    bj_runs = BlackjackSimulation().run_batch(bj_params, n_runs.value)
-    rl_runs = RouletteSimulation().run_batch(rl_params, n_runs.value)
-    sl_runs = SlotsSimulation().run_batch(sl_params, n_runs.value)
+    _n = n_runs.value
+    bj_runs, rl_runs, sl_runs = [], [], []
+
+    _games = [
+        ("Blackjack", BlackjackSimulation(), bj_params, bj_runs),
+        ("Roulette",  RouletteSimulation(),  rl_params, rl_runs),
+        ("Slots",     SlotsSimulation(),     sl_params, sl_runs),
+    ]
+
+    with mo.status.progress_bar(
+        total=_n * len(_games),
+        title="Running simulations…",
+        completion_title="Done",
+        show_rate=True,
+        show_eta=True,
+    ) as _bar:
+        for _label, _sim, _params, _out in _games:
+            for _ in range(_n):
+                _out.append(_sim.run(_params))
+                _bar.update(subtitle=_label)
 
     return bj_runs, rl_runs, sl_runs
 
