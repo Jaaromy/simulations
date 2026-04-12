@@ -1,6 +1,6 @@
 import marimo
 
-__generated_with = "0.9.0"
+__generated_with = "0.23.1"
 app = marimo.App(width="wide")
 
 
@@ -9,18 +9,23 @@ def _():
     import marimo as mo
     import numpy as np
     import plotly.graph_objects as go
+
     return go, mo, np
 
 
 @app.cell
 def _(mo):
-    mo.md("# Casino Simulation Comparison")
+    mo.md("""
+    # Casino Simulation Comparison
+    """)
     return
 
 
 @app.cell
 def _(mo):
-    mo.md("## Parameters")
+    mo.md("""
+    ## Parameters
+    """)
     return
 
 
@@ -61,11 +66,30 @@ def _(mo):
         mo.hstack([use_basic_strategy, use_hilo, hilo_max_bet_units], justify="start"),
         run_button,
     ])
-    return bet_size, hilo_max_bet_units, initial_bankroll, n_rounds, n_runs, run_button, use_basic_strategy, use_hilo
+    return (
+        bet_size,
+        hilo_max_bet_units,
+        initial_bankroll,
+        n_rounds,
+        n_runs,
+        run_button,
+        use_basic_strategy,
+        use_hilo,
+    )
 
 
 @app.cell
-def _(bet_size, hilo_max_bet_units, initial_bankroll, mo, n_rounds, n_runs, run_button, use_basic_strategy, use_hilo):
+def _(
+    bet_size,
+    hilo_max_bet_units,
+    initial_bankroll,
+    mo,
+    n_rounds,
+    n_runs,
+    run_button,
+    use_basic_strategy,
+    use_hilo,
+):
     mo.stop(not run_button.value)
     from simulations.casino.blackjack.game import BlackjackSimulation
     from simulations.casino.blackjack.params import BlackjackParams
@@ -114,12 +138,11 @@ def _(bet_size, hilo_max_bet_units, initial_bankroll, mo, n_rounds, n_runs, run_
             for _ in range(_n):
                 _out.append(_sim.run(_params))
                 _bar.update(subtitle=_label)
-
     return bj_runs, rl_runs, sl_runs
 
 
 @app.cell
-def _(bj_runs, go, initial_bankroll, rl_runs, sl_runs):
+def _(bj_runs, go, initial_bankroll, np, rl_runs, sl_runs):
     fig = go.Figure()
 
     _colors = {
@@ -183,7 +206,7 @@ def _(bj_runs, go, initial_bankroll, rl_runs, sl_runs):
     )
 
     fig
-    return (fig,)
+    return
 
 
 @app.cell
@@ -211,7 +234,7 @@ def _(bj_runs, go, np, rl_runs, sl_runs):
     )
 
     summary_fig
-    return (summary_fig,)
+    return
 
 
 if __name__ == "__main__":

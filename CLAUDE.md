@@ -15,6 +15,8 @@ uv sync --extra ui --extra dev   # IMPORTANT: bare `uv sync` omits marimo and py
 ## Marimo notebooks
 
 - All imports (`numpy`, `plotly`, etc.) must live in a **single cell** and be returned so other cells can receive them as arguments. NEVER import the same name in two different cells — Marimo requires all variable names to be unique across cells.
+- Variable names must be unique across all cells. Use the `_` prefix for cell-local variables to avoid cross-cell conflicts.
+- **Never claim a notebook is complete without running `uv run marimo run notebooks/<name>.py` and confirming it starts without errors.**
 
 ## Plotting performance
 
