@@ -6,11 +6,22 @@ from simulations.casino.blackjack.params import BlackjackParams
 from simulations.core.base import Simulation
 from simulations.core.results import TimeSeriesResult
 
+_BLACKJACK_VALUE = 21          # Natural / bust threshold
+_ACE_SOFT_VALUE = 11           # Ace counted as soft (high)
+_ACE_SOFT_REDUCTION = 10       # Subtract when converting soft ace to hard (11 → 1)
+_DEALER_STAND_THRESHOLD = 17   # Dealer (and basic-strategy player) stands at 17+
+_BLACKJACK_PAYOUT = 1.5        # Natural blackjack pays 3:2
+_DOUBLE_DOWN_MULTIPLIER = 2    # Double-down doubles the wager
+_CARDS_PER_DECK = 52           # Standard deck size
+_MIN_DECKS_FOR_COUNT = 0.5     # True count unreliable below this many decks remaining
+_MIN_CUT_CARD = 15             # Minimum absolute cut-card position (cards from end)
+_SHOE_CUT_FRACTION = 4         # Cut card placed at 1/_SHOE_CUT_FRACTION from the end
+
 # Card values: 2-9 face value, 10/J/Q/K = 10, A = 11 (soft) or 1 (hard)
-_CARD_VALUES = [2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10, 11]
+_CARD_VALUES = [2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10, _ACE_SOFT_VALUE]
 
 # Hi/Lo count: +1 for low cards (2-6), 0 neutral (7-9), -1 for high cards (10, A)
-_HI_LO: dict[int, int] = {2: 1, 3: 1, 4: 1, 5: 1, 6: 1, 7: 0, 8: 0, 9: 0, 10: -1, 11: -1}
+_HI_LO: dict[int, int] = {2: 1, 3: 1, 4: 1, 5: 1, 6: 1, 7: 0, 8: 0, 9: 0, 10: -1, _ACE_SOFT_VALUE: -1}
 
 
 def _build_shoe(deck_count: int) -> list[int]:
@@ -19,9 +30,9 @@ def _build_shoe(deck_count: int) -> list[int]:
 
 def _hand_value(hand: list[int]) -> int:
     total = sum(hand)
-    aces = hand.count(11)
-    while total > 21 and aces:
-        total -= 10
+    aces = hand.count(_ACE_SOFT_VALUE)
+    while total > _BLACKJACK_VALUE and aces:
+        total -= _ACE_SOFT_REDUCTION
         aces -= 1
     return total
 
@@ -83,20 +94,20 @@ def _draw(shoe: "_Shoe | list[int]", rng: random.Random) -> int:
 def _basic_strategy_hit(player: list[int], dealer_up: int) -> bool:
     """Basic strategy hit/stand decision, called after double/split checks."""
     pv = _hand_value(player)
-    has_soft_ace = 11 in player and sum(player) <= 21
+    has_soft_ace = _ACE_SOFT_VALUE in player and sum(player) <= _BLACKJACK_VALUE
 
-    if pv <= 11:
+    if pv <= _ACE_SOFT_VALUE:
         return True
 
     if has_soft_ace:
-        if pv <= 17:
+        if pv <= _DEALER_STAND_THRESHOLD:
             return True
         if pv == 18:  # Soft 18: hit vs 9, 10, A
-            return dealer_up in (9, 10, 11)
+            return dealer_up in (9, 10, _ACE_SOFT_VALUE)
         return False  # Soft 19+: stand
 
     # Hard hands
-    if pv >= 17:
+    if pv >= _DEALER_STAND_THRESHOLD:
         return False
     # Hard 12: stand vs 4–6, hit otherwise
     if pv == 12:
@@ -110,7 +121,7 @@ def _should_double(player: list[int], dealer_up: int) -> bool:
     if len(player) != 2:
         return False
     pv = _hand_value(player)
-    has_soft_ace = 11 in player
+    has_soft_ace = _ACE_SOFT_VALUE in player
 
     if has_soft_ace:
         if pv == 19:  # A8: double vs 6
@@ -139,7 +150,7 @@ def _should_split(player: list[int], dealer_up: int) -> bool:
     if len(player) != 2 or player[0] != player[1]:
         return False
     card = player[0]
-    if card == 11:  # Aces: always split
+    if card == _ACE_SOFT_VALUE:  # Aces: always split
         return True
     if card == 8:   # 8s: always split
         return True
@@ -172,13 +183,13 @@ def _play_single_hand(
         card = _draw(shoe, rng)
         running_count += _HI_LO[card]
         hand.append(card)
-        return bet * 2, hand, running_count
+        return bet * _DOUBLE_DOWN_MULTIPLIER, hand, running_count
 
     while True:
         pv = _hand_value(hand)
-        if pv >= 21:
+        if pv >= _BLACKJACK_VALUE:
             break
-        should_hit = _basic_strategy_hit(hand, dealer_up) if use_basic else pv < 17
+        should_hit = _basic_strategy_hit(hand, dealer_up) if use_basic else pv < _DEALER_STAND_THRESHOLD
         if not should_hit:
             break
         card = _draw(shoe, rng)
@@ -204,15 +215,15 @@ def _play_hand(
     running_count += _HI_LO[dealer_up]
 
     # Natural blackjack check
-    if _hand_value(player) == 21:
+    if _hand_value(player) == _BLACKJACK_VALUE:
         running_count += _HI_LO[dealer[1]]
-        if _hand_value(dealer) == 21:
+        if _hand_value(dealer) == _BLACKJACK_VALUE:
             return 0.0, running_count
-        return bet * 1.5, running_count
+        return bet * _BLACKJACK_PAYOUT, running_count
 
     # Split
     if use_basic and _should_split(player, dealer_up):
-        split_aces = player[0] == 11
+        split_aces = player[0] == _ACE_SOFT_VALUE
         hands: list[list[int]] = [[player[0]], [player[1]]]
         for hand in hands:
             card = _draw(shoe, rng)
@@ -231,7 +242,7 @@ def _play_hand(
                 played.append((final_hand, eff_bet))
 
         running_count += _HI_LO[dealer[1]]
-        while _hand_value(dealer) < 17:
+        while _hand_value(dealer) < _DEALER_STAND_THRESHOLD:
             card = _draw(shoe, rng)
             running_count += _HI_LO[card]
             dealer.append(card)
@@ -240,7 +251,7 @@ def _play_hand(
         net = 0.0
         for hand, hand_bet in played:
             pv = _hand_value(hand)
-            if pv > 21:
+            if pv > _BLACKJACK_VALUE:
                 net -= hand_bet
             elif dv > 21 or pv > dv:
                 net += hand_bet
@@ -254,20 +265,20 @@ def _play_hand(
     )
 
     pv = _hand_value(player)
-    if pv > 21:
+    if pv > _BLACKJACK_VALUE:
         running_count += _HI_LO[dealer[1]]
         return -eff_bet, running_count
 
     running_count += _HI_LO[dealer[1]]
 
-    while _hand_value(dealer) < 17:
+    while _hand_value(dealer) < _DEALER_STAND_THRESHOLD:
         card = _draw(shoe, rng)
         running_count += _HI_LO[card]
         dealer.append(card)
 
     dv = _hand_value(dealer)
 
-    if dv > 21 or pv > dv:
+    if dv > _BLACKJACK_VALUE or pv > dv:
         return eff_bet, running_count
     if pv == dv:
         return 0.0, running_count
@@ -276,8 +287,8 @@ def _play_hand(
 
 def _true_count(running_count: int, cards_remaining: int) -> float:
     """Convert running count to true count (per remaining deck)."""
-    decks_remaining = cards_remaining / 52
-    if decks_remaining < 0.5:
+    decks_remaining = cards_remaining / _CARDS_PER_DECK
+    if decks_remaining < _MIN_DECKS_FOR_COUNT:
         return 0.0
     return running_count / decks_remaining
 
@@ -303,7 +314,7 @@ class BlackjackSimulation(Simulation[BlackjackParams, TimeSeriesResult]):
         params.validate()
         rng = random.Random(params.seed)
         shoe = _Shoe(params.deck_count, rng)
-        cut_card = max(15, len(_build_shoe(params.deck_count)) // 4)
+        cut_card = max(_MIN_CUT_CARD, len(_build_shoe(params.deck_count)) // _SHOE_CUT_FRACTION)
         running_count = 0
 
         bankroll = params.initial_bankroll

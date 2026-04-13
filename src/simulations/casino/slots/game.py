@@ -5,6 +5,9 @@ from simulations.core.base import Simulation
 from simulations.core.results import TimeSeriesResult
 
 
+_WIN_PROBABILITY = 0.15  # Fraction of spins that land a win; must match exponential scale below
+
+
 class SlotsSimulation(Simulation[SlotsParams, TimeSeriesResult]):
     """Simulates player bankroll over N spins of a slot machine.
 
@@ -29,9 +32,9 @@ class SlotsSimulation(Simulation[SlotsParams, TimeSeriesResult]):
 
         # ~85% of spins lose; ~15% win with exponential payout
         # Scaled so E[payout] = rtp * bet_size
-        win_mask = rng.random(params.n_spins) < 0.15
-        # Exponential payouts for winning spins; scale = rtp / 0.15
-        payouts = rng.exponential(scale=params.rtp / 0.15, size=params.n_spins)
+        win_mask = rng.random(params.n_spins) < _WIN_PROBABILITY
+        # Exponential payouts for winning spins; scale = rtp / WIN_PROBABILITY
+        payouts = rng.exponential(scale=params.rtp / _WIN_PROBABILITY, size=params.n_spins)
 
         # Net per spin: win → payout*bet - bet; lose → -bet
         outcomes = np.where(win_mask, (payouts - 1.0) * params.bet_size, -params.bet_size)
