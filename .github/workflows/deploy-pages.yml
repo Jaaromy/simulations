@@ -10,6 +10,9 @@ permissions:
   pages: write
   id-token: write
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 concurrency:
   group: pages
   cancel-in-progress: true
@@ -26,27 +29,8 @@ jobs:
       - name: Install dependencies
         run: uv sync --extra ui
 
-      - name: Build wheel
-        run: uv build --wheel
-
-      - name: Create output directories
-        run: mkdir -p _site/wheels
-
-      - name: Copy wheel to site
-        run: cp dist/simulations-*.whl _site/wheels/
-
-      - name: Export notebooks to WASM
-        run: |
-          for nb in notebooks/*.py; do
-            name=$(basename "$nb" .py)
-            uv run marimo export html-wasm "$nb" -o "_site/$name/" --mode run -f
-          done
-
-      - name: Copy landing page
-        run: cp pages/index.html _site/index.html
-
-      - name: Ensure .nojekyll exists
-        run: touch _site/.nojekyll
+      - name: Build site
+        run: make build-site
 
       - name: Upload pages artifact
         uses: actions/upload-pages-artifact@v3

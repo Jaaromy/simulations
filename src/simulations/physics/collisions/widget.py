@@ -122,9 +122,9 @@ def _build_js(config_json: str) -> str:
   // ── Engine ────────────────────────────────────────────────────────────────
   var engine = Matter.Engine.create({{
     enableSleeping:       true,
-    positionIterations:   10,
-    velocityIterations:   8,
-    constraintIterations: 4,
+    positionIterations:   20,
+    velocityIterations:   16,
+    constraintIterations: 6,
   }});
   engine.gravity.y = config.gravity_y;
 
@@ -244,6 +244,8 @@ def _build_js(config_json: str) -> str:
 
   // ── Run ───────────────────────────────────────────────────────────────────
   Matter.Render.run(render);
-  var runner = Matter.Runner.create();
+  // 120 Hz physics: half the per-step displacement → shallower penetrations
+  // → solver converges before residual velocity can propagate as a wave.
+  var runner = Matter.Runner.create({{ delta: 1000 / 120 }});
   Matter.Runner.run(runner, engine);
 }})();"""

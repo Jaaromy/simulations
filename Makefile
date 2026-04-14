@@ -50,6 +50,7 @@ build-site:
 	for nb in notebooks/*.py; do \
 		name=$$(basename $$nb .py); \
 		uv run marimo export html-wasm $$nb -o _site/$$name/ --mode run -f; \
+		uv run python3 -c "f='_site/$$name/index.html'; b=open('pages/back_link.html').read(); c=open(f).read(); open(f,'w').write(c.replace('<body>','<body>'+b,1))"; \
 	done
 	cp pages/index.html _site/index.html
 	touch _site/.nojekyll
