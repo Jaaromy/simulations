@@ -1,7 +1,18 @@
 import marimo
 
 __generated_with = "0.9.0"
-app = marimo.App(width="wide")
+app = marimo.App()
+
+
+@app.cell
+async def _():
+    wasm_ready = True
+    try:
+        import micropip
+        await micropip.install("../../wheels/simulations-0.1.0-py3-none-any.whl")
+    except Exception:
+        pass
+    return (wasm_ready,)
 
 
 @app.cell
@@ -51,7 +62,7 @@ def _(mo):
 
 
 @app.cell
-def _(birth_rate, carrying_capacity, death_rate, initial_population, n_generations, n_runs):
+def _(birth_rate, carrying_capacity, death_rate, initial_population, n_generations, n_runs, wasm_ready):
     from simulations.evolution.genetics.params import GeneticsParams
     from simulations.evolution.genetics.population import GeneticsSimulation
 

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Simulations</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #0f1117;
+      color: #e2e8f0;
+      min-height: 100vh;
+      padding: 3rem 1.5rem;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    header h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: #f8fafc;
+    }
+
+    header p {
+      margin-top: 0.75rem;
+      color: #94a3b8;
+      font-size: 1.05rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.25rem;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: #1e2130;
+      border: 1px solid #2d3148;
+      border-radius: 12px;
+      padding: 1.5rem;
+      text-decoration: none;
+      color: inherit;
+      transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .card:hover {
+      border-color: #4f6ef7;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(79, 110, 247, 0.15);
+    }
+
+    .card-tag {
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #64748b;
+    }
+
+    .card h2 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #f1f5f9;
+    }
+
+    .card p {
+      font-size: 0.875rem;
+      color: #94a3b8;
+      line-height: 1.5;
+    }
+
+    .card .arrow {
+      margin-top: auto;
+      padding-top: 1rem;
+      font-size: 0.85rem;
+      color: #4f6ef7;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 4rem;
+      font-size: 0.8rem;
+      color: #475569;
+      line-height: 1.8;
+    }
+
+    footer a { color: #4f6ef7; text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Simulations</h1>
+    <p>Interactive physics, biology, and probability simulations — runs entirely in your browser.</p>
+  </header>
+
+  <div class="grid">
+    <a class="card" href="casino_comparison/">
+      <span class="card-tag">Probability</span>
+      <h2>Casino Comparison</h2>
+      <p>Blackjack, roulette, and slots head-to-head. Watch the house edge grind bankrolls across hundreds of thousands of rounds.</p>
+      <span class="arrow">Open →</span>
+    </a>
+
+    <a class="card" href="evolution_exploration/">
+      <span class="card-tag">Biology</span>
+      <h2>Population Genetics</h2>
+      <p>Logistic growth with stochastic birth/death dynamics. Tune carrying capacity, birth rate, and death rate to explore S-curve trajectories.</p>
+      <span class="arrow">Open →</span>
+    </a>
+
+    <a class="card" href="ising_exploration/">
+      <span class="card-tag">Physics</span>
+      <h2>Ising Model</h2>
+      <p>2D ferromagnetic phase transition via Metropolis dynamics. Visualise spin domains and magnetisation near the critical temperature T<sub>c</sub> ≈ 2.27.</p>
+      <span class="arrow">Open →</span>
+    </a>
+
+    <a class="card" href="double_pendulum/">
+      <span class="card-tag">Physics</span>
+      <h2>Double Pendulum</h2>
+      <p>Chaotic trajectory visualisation with RK4 integration. Compare two pendulums with a 0.01° difference to see sensitive dependence on initial conditions.</p>
+      <span class="arrow">Open →</span>
+    </a>
+
+    <a class="card" href="sir_epidemic/">
+      <span class="card-tag">Epidemiology</span>
+      <h2>SIR Epidemic Model</h2>
+      <p>Susceptible–Infectious–Recovered compartmental dynamics. Explore R₀, herd immunity threshold, and peak infection timing.</p>
+      <span class="arrow">Open →</span>
+    </a>
+
+    <a class="card" href="ball_collisions/">
+      <span class="card-tag">Physics</span>
+      <h2>Ball Collisions</h2>
+      <p>Real-time 2D rigid-body physics via Matter.js. Adjust restitution, friction, gravity, and ball count to explore collision dynamics.</p>
+      <span class="arrow">Open →</span>
+    </a>
+  </div>
+
+  <footer>
+    <p>Powered by <a href="https://marimo.io" target="_blank" rel="noopener">Marimo</a> + <a href="https://pyodide.org" target="_blank" rel="noopener">Pyodide</a> (Python in WebAssembly)</p>
+    <p>First load may take 15–30 seconds while the Python runtime initialises. Subsequent visits are cached.</p>
+  </footer>
+</body>
+</html>

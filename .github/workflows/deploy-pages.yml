@@ -1,0 +1,65 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Install dependencies
+        run: uv sync --extra ui
+
+      - name: Build wheel
+        run: uv build --wheel
+
+      - name: Create output directories
+        run: mkdir -p _site/wheels
+
+      - name: Copy wheel to site
+        run: cp dist/simulations-*.whl _site/wheels/
+
+      - name: Export notebooks to WASM
+        run: |
+          for nb in notebooks/*.py; do
+            name=$(basename "$nb" .py)
+            uv run marimo export html-wasm "$nb" -o "_site/$name/" --mode run -f
+          done
+
+      - name: Copy landing page
+        run: cp pages/index.html _site/index.html
+
+      - name: Ensure .nojekyll exists
+        run: touch _site/.nojekyll
+
+      - name: Upload pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

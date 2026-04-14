@@ -1,7 +1,18 @@
 import marimo
 
 __generated_with = "0.23.1"
-app = marimo.App(width="wide")
+app = marimo.App()
+
+
+@app.cell
+async def _():
+    wasm_ready = True
+    try:
+        import micropip
+        await micropip.install("../../wheels/simulations-0.1.0-py3-none-any.whl")
+    except Exception:
+        pass
+    return (wasm_ready,)
 
 
 @app.cell
@@ -84,6 +95,7 @@ def _(
     restitution_slider,
     speed_slider,
     vectors_toggle,
+    wasm_ready,
 ):
     from simulations.physics.collisions.params import CollisionParams
     from simulations.physics.collisions.widget import build_collision_html

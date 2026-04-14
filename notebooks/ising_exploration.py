@@ -1,7 +1,18 @@
 import marimo
 
 __generated_with = "0.9.0"
-app = marimo.App(width="wide")
+app = marimo.App()
+
+
+@app.cell
+async def _():
+    wasm_ready = True
+    try:
+        import micropip
+        await micropip.install("../../wheels/simulations-0.1.0-py3-none-any.whl")
+    except Exception:
+        pass
+    return (wasm_ready,)
 
 
 @app.cell
@@ -43,7 +54,7 @@ def _(mo):
 
 
 @app.cell
-def _(grid_size, initial_state, n_sweeps, temperature):
+def _(grid_size, initial_state, n_sweeps, temperature, wasm_ready):
     import numpy as np
     from simulations.physics.ising.params import IsingParams
     from simulations.physics.ising.model import IsingSimulation

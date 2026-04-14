@@ -1,7 +1,18 @@
 import marimo
 
 __generated_with = "0.23.1"
-app = marimo.App(width="wide")
+app = marimo.App()
+
+
+@app.cell
+async def _():
+    wasm_ready = True
+    try:
+        import micropip
+        await micropip.install("../../wheels/simulations-0.1.0-py3-none-any.whl")
+    except Exception:
+        pass
+    return (wasm_ready,)
 
 
 @app.cell
@@ -58,6 +69,7 @@ def _(
     t_end_slider,
     theta1_slider,
     theta2_slider,
+    wasm_ready,
 ):
     mo.stop(not run_button.value)
 

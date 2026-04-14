@@ -1,7 +1,18 @@
 import marimo
 
 __generated_with = "0.23.1"
-app = marimo.App(width="wide")
+app = marimo.App()
+
+
+@app.cell
+async def _():
+    wasm_ready = True
+    try:
+        import micropip
+        await micropip.install("../../wheels/simulations-0.1.0-py3-none-any.whl")
+    except Exception:
+        pass
+    return (wasm_ready,)
 
 
 @app.cell
@@ -89,6 +100,7 @@ def _(
     run_button,
     use_basic_strategy,
     use_hilo,
+    wasm_ready,
 ):
     mo.stop(not run_button.value)
     from simulations.casino.blackjack.game import BlackjackSimulation

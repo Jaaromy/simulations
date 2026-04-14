@@ -8,9 +8,8 @@ version = "0.1.0"
 description = "Multi-domain simulation framework"
 requires-python = ">=3.12"
 dependencies = [
-    "numpy>=2.4",
-    "pandas>=3.0",
-    "plotly>=6.0",
+    "numpy>=2.0",
+    "plotly>=5.0",
 ]
 
 [project.optional-dependencies]
