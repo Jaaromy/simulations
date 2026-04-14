@@ -54,7 +54,7 @@ def _(mo):
 
 
 @app.cell
-def _(grid_size, initial_state, n_sweeps, temperature, wasm_ready):
+def _(grid_size, initial_state, mo, n_sweeps, temperature, wasm_ready):
     import numpy as np
     from simulations.physics.ising.params import IsingParams
     from simulations.physics.ising.model import IsingSimulation
@@ -69,7 +69,8 @@ def _(grid_size, initial_state, n_sweeps, temperature, wasm_ready):
         initial_state=initial_state.value,
         seed=0,
     )
-    result = IsingSimulation().run(params)
+    with mo.status.spinner(title="Running simulation…"):
+        result = IsingSimulation().run(params)
     return np, params, result
 
 

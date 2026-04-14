@@ -86,23 +86,24 @@ def _(
         n_snapshots=_n_snapshots,
     )
 
-    result = _sim.run(_params)
+    with mo.status.spinner(title="Running simulation…"):
+        result = _sim.run(_params)
 
-    if chaos_toggle.value:
-        _params2 = PendulumParams(
-            theta1_0=float(theta1_slider.value) + 0.01,
-            theta2_0=float(theta2_slider.value),
-            t_end=float(t_end_slider.value),
-            n_snapshots=_n_snapshots,
-        )
-        result2 = _sim.run(_params2)
-        angular_separation = np.sqrt(
-            (result.theta1 - result2.theta1) ** 2
-            + (result.theta2 - result2.theta2) ** 2
-        )
-    else:
-        result2 = None
-        angular_separation = None
+        if chaos_toggle.value:
+            _params2 = PendulumParams(
+                theta1_0=float(theta1_slider.value) + 0.01,
+                theta2_0=float(theta2_slider.value),
+                t_end=float(t_end_slider.value),
+                n_snapshots=_n_snapshots,
+            )
+            result2 = _sim.run(_params2)
+            angular_separation = np.sqrt(
+                (result.theta1 - result2.theta1) ** 2
+                + (result.theta2 - result2.theta2) ** 2
+            )
+        else:
+            result2 = None
+            angular_separation = None
     return angular_separation, result, result2
 
 

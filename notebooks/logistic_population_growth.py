@@ -62,7 +62,7 @@ def _(mo):
 
 
 @app.cell
-def _(birth_rate, carrying_capacity, death_rate, initial_population, n_generations, n_runs, wasm_ready):
+def _(birth_rate, carrying_capacity, death_rate, initial_population, n_generations, mo, n_runs, wasm_ready):
     from simulations.evolution.logistic.params import LogisticParams
     from simulations.evolution.logistic.population import LogisticSimulation
 
@@ -74,7 +74,8 @@ def _(birth_rate, carrying_capacity, death_rate, initial_population, n_generatio
         carrying_capacity=int(carrying_capacity.value),
     )
 
-    runs = LogisticSimulation().run_batch(params, n_runs.value)
+    with mo.status.spinner(title="Running simulation…"):
+        runs = LogisticSimulation().run_batch(params, n_runs.value)
     return params, runs
 
 

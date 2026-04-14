@@ -98,7 +98,8 @@ def _(
         n_snapshots=600,
     )
 
-    result = SIRSimulation().run(_params)
+    with mo.status.spinner(title="Running simulation…"):
+        result = SIRSimulation().run(_params)
     return (result,)
 
 
@@ -138,6 +139,20 @@ def _(mo, result):
             bordered=True,
         ),
     ], justify="center", gap="1rem")
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md("""
+    ### Epidemic dynamics
+
+    The three curves show how each compartment evolves over time.
+    **S** (blue) falls as susceptibles become infected.
+    **I** (red) peaks when new infections equal recoveries — the epidemic's turning point, marked by the dashed vertical line.
+    **R** (green) rises monotonically: every recovered individual gains lasting immunity.
+    The faster I peaks and collapses, the lower the total attack rate.
+    """)
     return
 
 
@@ -182,6 +197,20 @@ def _(go, result):
         legend=dict(x=0.7, y=0.9),
     )
     _fig
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md("""
+    ### Phase portrait
+
+    Instead of plotting against time, the phase portrait traces the epidemic through **(S, I)** state space.
+    The path starts top-right (high S, low I), arcs up to the peak where **S = 1/R₀** (dashed line), then descends
+    as the outbreak exhausts the susceptible pool.
+    The orange dashed curve is the analytical phase curve — agreement with the simulation confirms solver accuracy.
+    Reading left along the x-axis tells you the final attack rate: how far S drops from 1 is the fraction of the population ultimately infected.
+    """)
     return
 
 
