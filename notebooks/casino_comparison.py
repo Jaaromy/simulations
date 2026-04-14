@@ -1,7 +1,7 @@
 import marimo
 
 __generated_with = "0.23.1"
-app = marimo.App()
+app = marimo.App(width="full")
 
 
 @app.cell
@@ -73,8 +73,8 @@ def _(mo):
     run_button = mo.ui.run_button(label="Run simulation")
 
     mo.vstack([
-        mo.hstack([n_rounds, initial_bankroll, bet_size, n_runs], justify="start"),
-        mo.hstack([use_basic_strategy, use_hilo, hilo_max_bet_units], justify="start"),
+        mo.hstack([n_rounds, initial_bankroll, bet_size, n_runs], justify="center"),
+        mo.hstack([use_basic_strategy, use_hilo, hilo_max_bet_units], justify="center"),
         run_button,
     ])
     return (

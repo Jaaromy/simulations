@@ -3,7 +3,7 @@ from typing import Any
 
 
 @dataclass(frozen=True)
-class GeneticsParams:
+class LogisticParams:
     n_generations: int = 100
     initial_population: int = 100
     birth_rate: float = 0.15      # offspring per individual per generation

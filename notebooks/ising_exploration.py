@@ -1,7 +1,7 @@
 import marimo
 
 __generated_with = "0.9.0"
-app = marimo.App()
+app = marimo.App(width="full")
 
 
 @app.cell
@@ -47,8 +47,8 @@ def _(mo):
         label='Initial state <abbr title="random: start disordered. aligned_up/down: start fully magnetised (faster equilibration in ordered phase).">[?]</abbr>',
     )
     mo.vstack([
-        mo.hstack([temperature, grid_size], justify="start"),
-        mo.hstack([n_sweeps, initial_state], justify="start"),
+        mo.hstack([temperature, grid_size], justify="center"),
+        mo.hstack([n_sweeps, initial_state], justify="center"),
     ])
     return grid_size, initial_state, n_sweeps, temperature
 

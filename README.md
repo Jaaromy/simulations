@@ -9,7 +9,7 @@ A Python framework for interactive simulations with parameterized inputs and liv
 | Casino | Blackjack | Bankroll over N hands with optional basic strategy |
 | Casino | Roulette | Bankroll over N spins with configurable bet type and wheel |
 | Casino | Slots | Bankroll over N spins with configurable RTP |
-| Evolution | Genetics | Logistic population growth with stochastic birth/death |
+| Evolution | Logistic Population Growth | Logistic population growth with stochastic birth/death |
 
 ## Setup
 
@@ -24,7 +24,7 @@ uv sync --extra ui --extra dev
 ```bash
 # Launch as a clean interactive app
 uv run marimo run notebooks/casino_comparison.py
-uv run marimo run notebooks/evolution_exploration.py
+uv run marimo run notebooks/logistic_population_growth.py
 
 # Open in edit/development mode
 uv run marimo edit notebooks/casino_comparison.py
@@ -42,7 +42,7 @@ uv run pytest
 src/simulations/
 ├── core/           # Simulation ABC, params protocol, result types
 ├── casino/         # blackjack · roulette · slots
-└── evolution/      # genetics (logistic population growth)
+└── evolution/      # logistic (logistic population growth)
 
 notebooks/          # Marimo interactive notebooks (.py)
 tests/              # Headless pytest tests (no UI dependencies)

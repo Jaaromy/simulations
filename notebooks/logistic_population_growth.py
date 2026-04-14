@@ -1,7 +1,7 @@
 import marimo
 
 __generated_with = "0.9.0"
-app = marimo.App()
+app = marimo.App(width="full")
 
 
 @app.cell
@@ -23,7 +23,7 @@ def _():
 
 @app.cell
 def _(mo):
-    mo.md("# Population Genetics Simulation")
+    mo.md("# Logistic Population Growth")
     return
 
 
@@ -55,18 +55,18 @@ def _(mo):
     )
 
     mo.vstack([
-        mo.hstack([n_generations, initial_population, n_runs], justify="start"),
-        mo.hstack([birth_rate, death_rate, carrying_capacity], justify="start"),
+        mo.hstack([n_generations, initial_population, n_runs], justify="center"),
+        mo.hstack([birth_rate, death_rate, carrying_capacity], justify="center"),
     ])
     return birth_rate, carrying_capacity, death_rate, initial_population, n_generations, n_runs
 
 
 @app.cell
 def _(birth_rate, carrying_capacity, death_rate, initial_population, n_generations, n_runs, wasm_ready):
-    from simulations.evolution.genetics.params import GeneticsParams
-    from simulations.evolution.genetics.population import GeneticsSimulation
+    from simulations.evolution.logistic.params import LogisticParams
+    from simulations.evolution.logistic.population import LogisticSimulation
 
-    params = GeneticsParams(
+    params = LogisticParams(
         n_generations=n_generations.value,
         initial_population=int(initial_population.value),
         birth_rate=birth_rate.value,
@@ -74,7 +74,7 @@ def _(birth_rate, carrying_capacity, death_rate, initial_population, n_generatio
         carrying_capacity=int(carrying_capacity.value),
     )
 
-    runs = GeneticsSimulation().run_batch(params, n_runs.value)
+    runs = LogisticSimulation().run_batch(params, n_runs.value)
     return params, runs
 
 

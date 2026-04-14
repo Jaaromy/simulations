@@ -1,7 +1,7 @@
 import marimo
 
 __generated_with = "0.23.1"
-app = marimo.App()
+app = marimo.App(width="full")
 
 
 @app.cell
@@ -54,8 +54,8 @@ def _(mo):
     run_button = mo.ui.run_button(label="Run simulation")
 
     mo.vstack([
-        mo.hstack([theta1_slider, theta2_slider, t_end_slider], justify="start"),
-        mo.hstack([chaos_toggle, run_button], justify="start"),
+        mo.hstack([theta1_slider, theta2_slider, t_end_slider], justify="center"),
+        mo.hstack([chaos_toggle, run_button], justify="center"),
     ])
     return chaos_toggle, run_button, t_end_slider, theta1_slider, theta2_slider
 

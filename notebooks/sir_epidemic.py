@@ -1,7 +1,7 @@
 import marimo
 
 __generated_with = "0.23.1"
-app = marimo.App()
+app = marimo.App(width="full")
 
 
 @app.cell
@@ -58,8 +58,8 @@ def _(mo):
     run_button = mo.ui.run_button(label="Run simulation")
 
     mo.vstack([
-        mo.hstack([N_input, I0_input], justify="start"),
-        mo.hstack([beta_slider, gamma_slider, t_end_input], justify="start"),
+        mo.hstack([N_input, I0_input], justify="center"),
+        mo.hstack([beta_slider, gamma_slider, t_end_input], justify="center"),
         run_button,
     ])
     return (
@@ -137,7 +137,7 @@ def _(mo, result):
             caption="Cumulative cases = R(∞)  (all who caught the disease)",
             bordered=True,
         ),
-    ], justify="start", gap="1rem")
+    ], justify="center", gap="1rem")
     return
 
 

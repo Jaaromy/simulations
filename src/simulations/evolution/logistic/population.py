@@ -2,10 +2,10 @@ import numpy as np
 
 from simulations.core.base import Simulation
 from simulations.core.results import TimeSeriesResult
-from simulations.evolution.genetics.params import GeneticsParams
+from simulations.evolution.logistic.params import LogisticParams
 
 
-class GeneticsSimulation(Simulation[GeneticsParams, TimeSeriesResult]):
+class LogisticSimulation(Simulation[LogisticParams, TimeSeriesResult]):
     """Simulates population size over N generations using a logistic growth model.
 
     Growth is density-dependent: as population approaches carrying_capacity,
@@ -15,13 +15,13 @@ class GeneticsSimulation(Simulation[GeneticsParams, TimeSeriesResult]):
 
     @property
     def name(self) -> str:
-        return "Genetics"
+        return "Logistic Population Growth"
 
     @property
     def description(self) -> str:
         return "Logistic population growth with stochastic birth/death events."
 
-    def run(self, params: GeneticsParams) -> TimeSeriesResult:
+    def run(self, params: LogisticParams) -> TimeSeriesResult:
         params.validate()
         rng = np.random.default_rng(params.seed)
 

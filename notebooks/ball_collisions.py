@@ -1,7 +1,7 @@
 import marimo
 
 __generated_with = "0.23.1"
-app = marimo.App()
+app = marimo.App(width="full")
 
 
 @app.cell
@@ -68,9 +68,9 @@ def _(mo):
     )
 
     mo.vstack([
-        mo.hstack([n_balls_slider, friction_slider, friction_air_slider], justify="start"),
-        mo.hstack([restitution_slider, speed_slider, gravity_slider], justify="start"),
-        mo.hstack([mass_max_slider, vectors_toggle], justify="start"),
+        mo.hstack([n_balls_slider, friction_slider, friction_air_slider], justify="center"),
+        mo.hstack([restitution_slider, speed_slider, gravity_slider], justify="center"),
+        mo.hstack([mass_max_slider, vectors_toggle], justify="center"),
     ])
     return (
         friction_air_slider,
@@ -112,7 +112,7 @@ def _(
         show_velocity_vectors=vectors_toggle.value,
     )
 
-    mo.Html(build_collision_html(_params))
+    mo.hstack([mo.Html(build_collision_html(_params))], justify="center")
     return
 
 

@@ -1,4 +1,4 @@
-.PHONY: help edit run-casino run-evolution run-ising run-pendulum run-sir run-collisions test build-site serve-site deploy-local
+.PHONY: help edit run-casino run-logistic run-ising run-pendulum run-sir run-collisions test build-site serve-site deploy-local
 
 help:
 	@echo "Usage:"
@@ -8,7 +8,7 @@ help:
 	@echo ""
 	@echo "Run as read-only app:"
 	@echo "  make run-casino"
-	@echo "  make run-evolution"
+	@echo "  make run-logistic"
 	@echo "  make run-ising"
 	@echo "  make run-pendulum"
 	@echo "  make run-sir"
@@ -25,8 +25,8 @@ edit:
 run-casino:
 	uv run marimo run notebooks/casino_comparison.py
 
-run-evolution:
-	uv run marimo run notebooks/evolution_exploration.py
+run-logistic:
+	uv run marimo run notebooks/logistic_population_growth.py
 
 run-ising:
 	uv run marimo run notebooks/ising_exploration.py

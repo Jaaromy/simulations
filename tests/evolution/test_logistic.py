@@ -1,5 +1,5 @@
 """
-Fidelity tests for GeneticsSimulation.
+Fidelity tests for LogisticSimulation.
 
 Three layers of coverage:
   1. Seed reproducibility  — same seed → bit-identical output.
@@ -39,61 +39,61 @@ import unittest.mock as mock
 import numpy as np
 import pytest
 
-from simulations.evolution.genetics.params import GeneticsParams
-from simulations.evolution.genetics.population import GeneticsSimulation
+from simulations.evolution.logistic.params import LogisticParams
+from simulations.evolution.logistic.population import LogisticSimulation
 
 
 @pytest.fixture
-def sim() -> GeneticsSimulation:
-    return GeneticsSimulation()
+def sim() -> LogisticSimulation:
+    return LogisticSimulation()
 
 
 # ---------------------------------------------------------------------------
 # Basic correctness
 # ---------------------------------------------------------------------------
 
-def test_result_shape(sim: GeneticsSimulation) -> None:
-    params = GeneticsParams(n_generations=50)
+def test_result_shape(sim: LogisticSimulation) -> None:
+    params = LogisticParams(n_generations=50)
     result = sim.run(params)
     assert len(result.steps) == 51
     assert len(result.values) == 51
 
 
-def test_starts_at_initial_population(sim: GeneticsSimulation) -> None:
-    params = GeneticsParams(initial_population=123)
+def test_starts_at_initial_population(sim: LogisticSimulation) -> None:
+    params = LogisticParams(initial_population=123)
     assert sim.run(params).values[0] == 123.0
 
 
-def test_population_never_negative(sim: GeneticsSimulation) -> None:
-    params = GeneticsParams(n_generations=200)
+def test_population_never_negative(sim: LogisticSimulation) -> None:
+    params = LogisticParams(n_generations=200)
     for _ in range(20):
         assert (sim.run(params).values >= 0).all()
 
 
-def test_batch_run_length(sim: GeneticsSimulation) -> None:
-    assert len(sim.run_batch(GeneticsParams(n_generations=10), n_runs=5)) == 5
+def test_batch_run_length(sim: LogisticSimulation) -> None:
+    assert len(sim.run_batch(LogisticParams(n_generations=10), n_runs=5)) == 5
 
 
-def test_invalid_params_raises(sim: GeneticsSimulation) -> None:
+def test_invalid_params_raises(sim: LogisticSimulation) -> None:
     with pytest.raises(ValueError, match="n_generations must be at least 1"):
-        sim.run(GeneticsParams(n_generations=0))
+        sim.run(LogisticParams(n_generations=0))
 
 
 # ---------------------------------------------------------------------------
 # 1. Seed reproducibility
 # ---------------------------------------------------------------------------
 
-def test_seed_reproducibility(sim: GeneticsSimulation) -> None:
+def test_seed_reproducibility(sim: LogisticSimulation) -> None:
     """Identical seeds must produce bit-identical trajectories."""
-    params = GeneticsParams(n_generations=100, seed=7)
+    params = LogisticParams(n_generations=100, seed=7)
     r1 = sim.run(params)
     r2 = sim.run(params)
     np.testing.assert_array_equal(r1.values, r2.values)
 
 
-def test_different_seeds_differ(sim: GeneticsSimulation) -> None:
-    r1 = sim.run(GeneticsParams(n_generations=100, seed=1))
-    r2 = sim.run(GeneticsParams(n_generations=100, seed=2))
+def test_different_seeds_differ(sim: LogisticSimulation) -> None:
+    r1 = sim.run(LogisticParams(n_generations=100, seed=1))
+    r2 = sim.run(LogisticParams(n_generations=100, seed=2))
     assert not np.array_equal(r1.values, r2.values)
 
 
@@ -101,12 +101,12 @@ def test_different_seeds_differ(sim: GeneticsSimulation) -> None:
 # 2. Distributional properties
 # ---------------------------------------------------------------------------
 
-def test_population_monotone_from_below_carrying_capacity(sim: GeneticsSimulation) -> None:
+def test_population_monotone_from_below_carrying_capacity(sim: LogisticSimulation) -> None:
     """
     Starting well below K with birth > death, the mean trajectory should
     trend upward over the first half of the run.
     """
-    params = GeneticsParams(
+    params = LogisticParams(
         n_generations=200,
         initial_population=100,
         birth_rate=0.2,
@@ -125,7 +125,7 @@ def test_population_monotone_from_below_carrying_capacity(sim: GeneticsSimulatio
 # 3. Equilibrium theory — population converges near N* within 5 SE
 # ---------------------------------------------------------------------------
 
-def test_equilibrium_near_theoretical_fixed_point(sim: GeneticsSimulation) -> None:
+def test_equilibrium_near_theoretical_fixed_point(sim: LogisticSimulation) -> None:
     """
     Fixed point: N* = K = 5000 for the parameters below.
 
@@ -153,7 +153,7 @@ def test_equilibrium_near_theoretical_fixed_point(sim: GeneticsSimulation) -> No
     se = np.sqrt(var_stat / n_eff)                # ≈ 15.81
     tolerance = 5 * se                            # ≈ 79
 
-    params = GeneticsParams(
+    params = LogisticParams(
         n_generations=n_generations,
         initial_population=100,
         birth_rate=b,
@@ -195,8 +195,8 @@ def test_single_step_exact_arithmetic() -> None:
     all shift λ_births or λ_deaths and cause this test to fail before any
     statistical test can surface the error.
     """
-    sim = GeneticsSimulation()
-    params = GeneticsParams(
+    sim = LogisticSimulation()
+    params = LogisticParams(
         n_generations=1,
         initial_population=500,
         birth_rate=0.10,
@@ -208,7 +208,7 @@ def test_single_step_exact_arithmetic() -> None:
     mock_rng.poisson.side_effect = [40, 30]  # first call: births; second: deaths
 
     with mock.patch(
-        "simulations.evolution.genetics.population.np.random.default_rng",
+        "simulations.evolution.logistic.population.np.random.default_rng",
         return_value=mock_rng,
     ):
         result = sim.run(params)
@@ -224,7 +224,7 @@ def test_single_step_exact_arithmetic() -> None:
     ))
 
 
-def test_zero_birth_rate_population_monotonically_nonincreasing(sim: GeneticsSimulation) -> None:
+def test_zero_birth_rate_population_monotonically_nonincreasing(sim: LogisticSimulation) -> None:
     """
     With birth_rate=0, effective_birth=0 exactly, so rng.poisson(0)=0 always.
     Births are deterministically zero every step; population can only decrease.
@@ -233,7 +233,7 @@ def test_zero_birth_rate_population_monotonically_nonincreasing(sim: GeneticsSim
     This is a zero-statistics deterministic bound — no distributional tolerance.
     A bug that accidentally adds births when birth_rate=0 breaks this immediately.
     """
-    params = GeneticsParams(
+    params = LogisticParams(
         n_generations=50,
         initial_population=200,
         birth_rate=0.0,
@@ -249,7 +249,7 @@ def test_zero_birth_rate_population_monotonically_nonincreasing(sim: GeneticsSim
     )
 
 
-def test_zero_rates_constant_population(sim: GeneticsSimulation) -> None:
+def test_zero_rates_constant_population(sim: LogisticSimulation) -> None:
     """
     With birth_rate=0 and death_rate=0, Poisson(0) always returns 0 births and
     0 deaths — deterministic regardless of seed.  Population must stay exactly
@@ -259,7 +259,7 @@ def test_zero_rates_constant_population(sim: GeneticsSimulation) -> None:
     or accidental mutation of the population variable will cause values to drift
     and fail here before any distributional test can catch it.
     """
-    params = GeneticsParams(
+    params = LogisticParams(
         n_generations=100,
         initial_population=500,
         birth_rate=0.0,
@@ -272,9 +272,9 @@ def test_zero_rates_constant_population(sim: GeneticsSimulation) -> None:
     )
 
 
-def test_extinction_when_death_exceeds_birth(sim: GeneticsSimulation) -> None:
+def test_extinction_when_death_exceeds_birth(sim: LogisticSimulation) -> None:
     """When death_rate >> birth_rate, population should trend to extinction."""
-    params = GeneticsParams(
+    params = LogisticParams(
         n_generations=200,
         initial_population=100,
         birth_rate=0.01,
