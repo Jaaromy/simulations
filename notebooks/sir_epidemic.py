@@ -27,6 +27,51 @@ def _():
 
 @app.cell
 def _(mo):
+    mo.Html("""<style>
+.tip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  cursor: help;
+  color: #6b7280;
+  font-size: 0.7em;
+  border: 1px solid #9ca3af;
+  border-radius: 50%;
+  width: 1.5em;
+  height: 1.5em;
+  margin-left: 4px;
+  vertical-align: middle;
+  font-style: normal;
+  user-select: none;
+}
+.tip::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1f2937;
+  color: #f9fafb;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 1.2rem;
+  width: 240px;
+  white-space: normal;
+  line-height: 1.4;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+  z-index: 9999;
+  text-align: left;
+}
+.tip:hover::after { opacity: 1; }
+</style>""")
+    return
+
+
+@app.cell
+def _(mo):
     mo.md("""
     # SIR Epidemic Model
     """)
@@ -37,23 +82,23 @@ def _(mo):
 def _(mo):
     N_input = mo.ui.number(
         start=100, stop=1_000_000, step=100, value=10_000,
-        label='Population N <abbr title="Total number of individuals. Divided into S+I+R = N at all times.">[?]</abbr>',
+        label='Population N <span class="tip" data-tip="Total number of individuals. Divided into S+I+R = N at all times.">?</span>',
     )
     I0_input = mo.ui.number(
         start=1, stop=10_000, step=1, value=10,
-        label='Initial infected I₀ <abbr title="Number of infectious individuals at t=0. All others start as susceptible.">[?]</abbr>',
+        label='Initial infected I₀ <span class="tip" data-tip="Number of infectious individuals at t=0. All others start as susceptible.">?</span>',
     )
     beta_slider = mo.ui.slider(
         start=0.01, stop=1.0, step=0.01, value=0.3,
-        label='β — transmission rate (day⁻¹) <abbr title="Rate at which a susceptible becomes infected per infectious contact. β = contact rate × transmission probability.">[?]</abbr>',
+        label='β — transmission rate (day⁻¹) <span class="tip" data-tip="Rate at which a susceptible becomes infected per infectious contact. β = contact rate × transmission probability.">?</span>',
     )
     gamma_slider = mo.ui.slider(
         start=0.01, stop=0.5, step=0.01, value=0.05,
-        label='γ — recovery rate (day⁻¹) <abbr title="Fraction of infectious who recover per day. Mean infectious period = 1/γ days.">[?]</abbr>',
+        label='γ — recovery rate (day⁻¹) <span class="tip" data-tip="Fraction of infectious who recover per day. Mean infectious period = 1/γ days.">?</span>',
     )
     t_end_input = mo.ui.slider(
         start=30, stop=730, step=10, value=365,
-        label='Duration (days) <abbr title="Simulation horizon in days.">[?]</abbr>',
+        label='Duration (days) <span class="tip" data-tip="Simulation horizon in days.">?</span>',
     )
     run_button = mo.ui.run_button(label="Run simulation")
 
