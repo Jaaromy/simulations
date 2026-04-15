@@ -38,24 +38,36 @@ def _(mo):
     scale_slider = mo.ui.slider(start=50, stop=300, step=10, value=180, label='Scale (px/m) <abbr title="Pixels per metre. Controls how large the pendulum appears on screen. Does not affect the physics.">[?]</abbr>')
     trail_toggle = mo.ui.checkbox(value=True, label='Show trails <abbr title="Draw the path traced by the tip of the last link. Useful for visualising chaotic vs periodic motion.">[?]</abbr>')
     trail_length_slider = mo.ui.slider(start=50, stop=500, step=50, value=200, label='Trail length <abbr title="Number of recent tip positions to keep in the trail. Longer trails show more history but can obscure the current position.">[?]</abbr>')
-    ic_textarea = mo.ui.text_area(
-        value="120, -60\n120.2, -60\n119.8, -60.1\n",
-        label='Initial angles (°) — one pendulum per line, N angles per line <abbr title="Each line defines one pendulum. Provide N comma-separated angles (degrees from downward vertical) for an N-link chain. Multiple nearly-identical lines visualise chaos: tiny differences diverge rapidly.">[?]</abbr>',
-    )
+    return (g_slider, n_links_slider, scale_slider, trail_length_slider, trail_toggle)
 
+
+@app.cell
+def _(mo, n_links_slider):
+    def _default_ic_text(n: int) -> str:
+        # Angles alternate sign and halve each link: 120, -60, 30, -15, 7.5
+        _base = [round(120.0 * ((-0.5) ** i), 1) for i in range(n)]
+        _fmt = lambda angles: ", ".join(str(a) for a in angles)
+        _p1 = _base.copy(); _p1[0] = round(_p1[0] + 0.2, 1)
+        _p2 = _base.copy(); _p2[0] = round(_p2[0] - 0.2, 1)
+        if n > 1:
+            _p2[1] = round(_p2[1] - 0.1, 1)
+        return f"{_fmt(_base)}\n{_fmt(_p1)}\n{_fmt(_p2)}\n"
+
+    ic_textarea = mo.ui.text_area(
+        value=_default_ic_text(n_links_slider.value),
+        label='Initial angles (°) — one pendulum per line, N comma-separated angles per line <abbr title="Each line defines one pendulum. Provide N comma-separated angles (degrees from downward vertical) for an N-link chain. Multiple nearly-identical lines visualise chaos: tiny differences diverge rapidly.">[?]</abbr>',
+    )
+    return (ic_textarea,)
+
+
+@app.cell
+def _(g_slider, ic_textarea, mo, n_links_slider, scale_slider, trail_length_slider, trail_toggle):
     mo.vstack([
         mo.hstack([n_links_slider, g_slider, scale_slider], justify="center"),
         mo.hstack([trail_toggle, trail_length_slider], justify="center"),
         mo.hstack([ic_textarea], justify="center"),
     ])
-    return (
-        g_slider,
-        ic_textarea,
-        n_links_slider,
-        scale_slider,
-        trail_length_slider,
-        trail_toggle,
-    )
+    return
 
 
 @app.cell
@@ -73,7 +85,8 @@ def _(
     from simulations.physics.n_pendulum.widget import build_n_pendulum_html
 
     _n = n_links_slider.value
-    _ics, _omegas = parse_ic_text(ic_textarea.value, _n, 10)
+    _n_pendulums = len([l for l in ic_textarea.value.strip().splitlines() if l.strip()]) or 1
+    _ics, _omegas = parse_ic_text(ic_textarea.value, _n, _n_pendulums)
 
     _params = NPendulumParams(
         n_links=_n,
