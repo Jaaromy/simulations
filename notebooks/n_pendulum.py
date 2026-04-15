@@ -33,14 +33,14 @@ def _(mo):
 
 @app.cell
 def _(mo):
-    n_links_slider = mo.ui.slider(start=1, stop=5, step=1, value=2, label='Links')
-    g_slider = mo.ui.slider(start=0, stop=20, step=0.1, value=9.81, label='Gravity (m/s²)')
-    scale_slider = mo.ui.slider(start=50, stop=300, step=10, value=180, label='Scale (px/m)')
-    trail_toggle = mo.ui.checkbox(value=True, label='Show trails')
-    trail_length_slider = mo.ui.slider(start=50, stop=500, step=50, value=200, label='Trail length')
+    n_links_slider = mo.ui.slider(start=1, stop=5, step=1, value=2, label='Links <abbr title="Number of rigid links in the pendulum chain. 1 = simple pendulum (periodic); 2+ = chaotic for large angles.">[?]</abbr>')
+    g_slider = mo.ui.slider(start=0, stop=20, step=0.1, value=9.81, label='Gravity (m/s²) <abbr title="Gravitational acceleration. 0 = zero-g (pendulum drifts freely); 9.81 = Earth; 20 = strong pull.">[?]</abbr>')
+    scale_slider = mo.ui.slider(start=50, stop=300, step=10, value=180, label='Scale (px/m) <abbr title="Pixels per metre. Controls how large the pendulum appears on screen. Does not affect the physics.">[?]</abbr>')
+    trail_toggle = mo.ui.checkbox(value=True, label='Show trails <abbr title="Draw the path traced by the tip of the last link. Useful for visualising chaotic vs periodic motion.">[?]</abbr>')
+    trail_length_slider = mo.ui.slider(start=50, stop=500, step=50, value=200, label='Trail length <abbr title="Number of recent tip positions to keep in the trail. Longer trails show more history but can obscure the current position.">[?]</abbr>')
     ic_textarea = mo.ui.text_area(
         value="120, -60\n120.2, -60\n119.8, -60.1\n",
-        label="Initial angles (°) — one pendulum per line, N angles per line",
+        label='Initial angles (°) — one pendulum per line, N angles per line <abbr title="Each line defines one pendulum. Provide N comma-separated angles (degrees from downward vertical) for an N-link chain. Multiple nearly-identical lines visualise chaos: tiny differences diverge rapidly.">[?]</abbr>',
     )
 
     mo.vstack([
