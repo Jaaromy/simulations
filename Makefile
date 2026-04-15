@@ -1,4 +1,4 @@
-.PHONY: help edit run-casino run-logistic run-ising run-pendulum run-sir run-collisions test build-site serve-site deploy-local
+.PHONY: help edit run-casino run-logistic run-ising run-pendulum run-sir run-collisions run-n-pendulum test test-js build-site serve-site deploy-local
 
 help:
 	@echo "Usage:"
@@ -11,6 +11,7 @@ help:
 	@echo "  make run-logistic"
 	@echo "  make run-ising"
 	@echo "  make run-pendulum"
+	@echo "  make run-n-pendulum"
 	@echo "  make run-sir"
 	@echo "  make run-collisions"
 	@echo ""
@@ -40,8 +41,15 @@ run-sir:
 run-collisions:
 	uv run marimo run notebooks/ball_collisions.py
 
+run-n-pendulum:
+	uv run marimo run notebooks/n_pendulum.py
+
 test:
 	uv run pytest
+	$(MAKE) test-js
+
+test-js:
+	node --test tests_js/*.test.mjs
 
 build-site:
 	uv build --wheel

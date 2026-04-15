@@ -80,3 +80,7 @@ For simulations with non-trivial per-step logic (card games, multi-branch decisi
 - Assert the exact net result — no tolerance bands
 
 These catch subtle logic bugs (wrong soft-hand rule, missing double-down, incorrect payout multiplier) that aggregate statistical tests will never surface.
+
+### Real-time / JavaScript simulations
+
+Simulations requiring live browser animation (e.g. pendulums, collisions) may implement their physics in JavaScript rather than Python. The accuracy-first rule is unchanged — all three required test layers (seed reproducibility, limit cases, theory cross-validation) must still be enforced, and JS tests live under `tests_js/` and run via `make test-js`. Where a trusted Python reference exists (e.g. `src/simulations/physics/pendulum` for N=2), JS output must be cross-validated against it to ≤1e-4 relative error over a fixed trajectory.
