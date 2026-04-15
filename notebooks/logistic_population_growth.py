@@ -23,6 +23,51 @@ def _():
 
 @app.cell
 def _(mo):
+    mo.Html("""<style>
+.tip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  cursor: help;
+  color: #6b7280;
+  font-size: 0.7em;
+  border: 1px solid #9ca3af;
+  border-radius: 50%;
+  width: 1.5em;
+  height: 1.5em;
+  margin-left: 4px;
+  vertical-align: middle;
+  font-style: normal;
+  user-select: none;
+}
+.tip::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1f2937;
+  color: #f9fafb;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 1.2rem;
+  width: 240px;
+  white-space: normal;
+  line-height: 1.4;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+  z-index: 9999;
+  text-align: left;
+}
+.tip:hover::after { opacity: 1; }
+</style>""")
+    return
+
+
+@app.cell
+def _(mo):
     mo.md("# Logistic Population Growth")
     return
 
@@ -31,27 +76,27 @@ def _(mo):
 def _(mo):
     n_generations = mo.ui.slider(
         start=10, stop=500, step=10, value=100,
-        label='Generations <abbr title="Total discrete time steps. Each generation applies births, deaths, and density-dependent regulation once.">[?]</abbr>',
+        label='Generations <span class="tip" data-tip="Total discrete time steps. Each generation applies births, deaths, and density-dependent regulation once.">?</span>',
     )
     initial_population = mo.ui.number(
         start=10, stop=10000, step=10, value=100,
-        label='Initial Population <abbr title="Population size at generation 0. Start far below carrying capacity to see the full S-curve approach to equilibrium.">[?]</abbr>',
+        label='Initial Population <span class="tip" data-tip="Population size at generation 0. Start far below carrying capacity to see the full S-curve approach to equilibrium.">?</span>',
     )
     birth_rate = mo.ui.slider(
         start=0.01, stop=0.5, step=0.01, value=0.15,
-        label='Birth Rate <abbr title="Per-individual probability of producing one offspring per generation. Net intrinsic growth rate r = birth_rate − death_rate.">[?]</abbr>',
+        label='Birth Rate <span class="tip" data-tip="Per-individual probability of producing one offspring per generation. Net intrinsic growth rate r = birth_rate − death_rate.">?</span>',
     )
     death_rate = mo.ui.slider(
         start=0.01, stop=0.5, step=0.01, value=0.05,
-        label='Death Rate <abbr title="Per-individual probability of dying per generation. When death_rate ≥ birth_rate the population declines to zero regardless of K.">[?]</abbr>',
+        label='Death Rate <span class="tip" data-tip="Per-individual probability of dying per generation. When death_rate ≥ birth_rate the population declines to zero regardless of K.">?</span>',
     )
     carrying_capacity = mo.ui.number(
         start=100, stop=50000, step=100, value=5000,
-        label='Carrying Capacity <abbr title="Maximum sustainable population K. Equilibrium N* = K exactly. Density-dependent feedback raises effective death rate as N→K.">[?]</abbr>',
+        label='Carrying Capacity <span class="tip" data-tip="Maximum sustainable population K. Equilibrium N* = K exactly. Density-dependent feedback raises effective death rate as N→K.">?</span>',
     )
     n_runs = mo.ui.slider(
         start=1, stop=20, step=1, value=5,
-        label='Simulation Runs <abbr title="Independent stochastic trajectories. More runs reveal outcome spread and stabilise the mean.">[?]</abbr>',
+        label='Simulation Runs <span class="tip" data-tip="Independent stochastic trajectories. More runs reveal outcome spread and stabilise the mean.">?</span>',
     )
 
     mo.vstack([
