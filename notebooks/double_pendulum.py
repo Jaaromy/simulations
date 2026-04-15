@@ -27,6 +27,51 @@ def _():
 
 @app.cell
 def _(mo):
+    mo.Html("""<style>
+.tip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  cursor: help;
+  color: #6b7280;
+  font-size: 0.7em;
+  border: 1px solid #9ca3af;
+  border-radius: 50%;
+  width: 1.5em;
+  height: 1.5em;
+  margin-left: 4px;
+  vertical-align: middle;
+  font-style: normal;
+  user-select: none;
+}
+.tip::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1f2937;
+  color: #f9fafb;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 1.2rem;
+  width: 240px;
+  white-space: normal;
+  line-height: 1.4;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+  z-index: 9999;
+  text-align: left;
+}
+.tip:hover::after { opacity: 1; }
+</style>""")
+    return
+
+
+@app.cell
+def _(mo):
     mo.md("""
     # Double Pendulum
     """)
@@ -37,19 +82,19 @@ def _(mo):
 def _(mo):
     theta1_slider = mo.ui.slider(
         start=-180, stop=180, step=1, value=120,
-        label='θ₁ — upper bob angle (°) <abbr title="Angle of the upper rod from the downward vertical. 0° = hanging straight down. 180° = pointing straight up.">[?]</abbr>',
+        label='θ₁ — upper bob angle (°) <span class="tip" data-tip="Angle of the upper rod from the downward vertical. 0° = hanging straight down. 180° = pointing straight up.">?</span>',
     )
     theta2_slider = mo.ui.slider(
         start=-180, stop=180, step=1, value=-20,
-        label='θ₂ — lower bob angle (°) <abbr title="Angle of the lower rod from the downward vertical. Setting this close to θ₁ gives regular motion; large differences produce chaos.">[?]</abbr>',
+        label='θ₂ — lower bob angle (°) <span class="tip" data-tip="Angle of the lower rod from the downward vertical. Setting this close to θ₁ gives regular motion; large differences produce chaos.">?</span>',
     )
     t_end_slider = mo.ui.slider(
         start=5, stop=60, step=5, value=30,
-        label='Duration (s) <abbr title="How long to simulate. Longer runs reveal more of the chaotic trajectory.">[?]</abbr>',
+        label='Duration (s) <span class="tip" data-tip="How long to simulate. Longer runs reveal more of the chaotic trajectory.">?</span>',
     )
     chaos_toggle = mo.ui.checkbox(
         value=True,
-        label='Show chaos comparison <abbr title="Runs a second pendulum with θ₁ perturbed by 0.01°. Both trajectories start indistinguishable but diverge exponentially — visualising sensitive dependence on initial conditions.">[?]</abbr>',
+        label='Show chaos comparison <span class="tip" data-tip="Runs a second pendulum with θ₁ perturbed by 0.01°. Both trajectories start indistinguishable but diverge exponentially — visualising sensitive dependence on initial conditions.">?</span>',
     )
     run_button = mo.ui.run_button(label="Run simulation")
 
