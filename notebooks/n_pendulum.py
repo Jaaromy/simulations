@@ -23,6 +23,51 @@ def _():
 
 @app.cell
 def _(mo):
+    mo.Html("""<style>
+.tip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  cursor: help;
+  color: #6b7280;
+  font-size: 0.7em;
+  border: 1px solid #9ca3af;
+  border-radius: 50%;
+  width: 1.5em;
+  height: 1.5em;
+  margin-left: 4px;
+  vertical-align: middle;
+  font-style: normal;
+  user-select: none;
+}
+.tip::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1f2937;
+  color: #f9fafb;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 1.2rem;
+  width: 240px;
+  white-space: normal;
+  line-height: 1.4;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+  z-index: 9999;
+  text-align: left;
+}
+.tip:hover::after { opacity: 1; }
+</style>""")
+    return
+
+
+@app.cell
+def _(mo):
     mo.md("""
     # N-Link Pendulum
     Real-time N-link pendulum simulation using Lagrangian mechanics and RK4 integration.
@@ -33,14 +78,14 @@ def _(mo):
 
 @app.cell
 def _(mo):
-    n_links_slider = mo.ui.slider(start=1, stop=5, step=1, value=2, label='Links <abbr title="Number of rigid links in the pendulum chain. 1 = simple pendulum (periodic); 2+ = chaotic for large angles.">[?]</abbr>')
-    g_slider = mo.ui.slider(start=0, stop=20, step=0.1, value=9.81, label='Gravity (m/s²) <abbr title="Gravitational acceleration. 0 = zero-g (pendulum drifts freely); 9.81 = Earth; 20 = strong pull.">[?]</abbr>')
-    scale_slider = mo.ui.slider(start=50, stop=300, step=10, value=180, label='Scale (px/m) <abbr title="Pixels per metre. Controls how large the pendulum appears on screen. Does not affect the physics.">[?]</abbr>')
-    trail_toggle = mo.ui.checkbox(value=True, label='Show trails <abbr title="Draw the path traced by the tip of the last link. Useful for visualising chaotic vs periodic motion.">[?]</abbr>')
-    trail_length_slider = mo.ui.slider(start=50, stop=500, step=50, value=200, label='Trail length <abbr title="Number of recent tip positions to keep in the trail. Longer trails show more history but can obscure the current position.">[?]</abbr>')
+    n_links_slider = mo.ui.slider(start=1, stop=5, step=1, value=2, label='Links <span class="tip" data-tip="Number of rigid links in the pendulum chain. 1 = simple pendulum (periodic); 2+ = chaotic for large angles.">?</span>')
+    g_slider = mo.ui.slider(start=0, stop=20, step=0.1, value=9.81, label='Gravity (m/s²) <span class="tip" data-tip="Gravitational acceleration. 0 = zero-g (pendulum drifts freely); 9.81 = Earth; 20 = strong pull.">?</span>')
+    scale_slider = mo.ui.slider(start=50, stop=300, step=10, value=180, label='Scale (px/m) <span class="tip" data-tip="Pixels per metre. Controls how large the pendulum appears on screen. Does not affect the physics.">?</span>')
+    trail_toggle = mo.ui.checkbox(value=True, label='Show trails <span class="tip" data-tip="Draw the path traced by the tip of the last link. Useful for visualising chaotic vs periodic motion.">?</span>')
+    trail_length_slider = mo.ui.slider(start=50, stop=500, step=50, value=200, label='Trail length <span class="tip" data-tip="Number of recent tip positions to keep in the trail. Longer trails show more history but can obscure the current position.">?</span>')
     ic_textarea = mo.ui.text_area(
         value="120, -60\n120.2, -60\n119.8, -60.1\n",
-        label='Initial angles (°) — one pendulum per line, N angles per line <abbr title="Each line defines one pendulum. Provide N comma-separated angles (degrees from downward vertical) for an N-link chain. Multiple nearly-identical lines visualise chaos: tiny differences diverge rapidly.">[?]</abbr>',
+        label='Initial angles (°) — one pendulum per line, N angles per line <span class="tip" data-tip="Each line defines one pendulum. Provide N comma-separated angles (degrees from downward vertical) for an N-link chain. Multiple nearly-identical lines visualise chaos: tiny differences diverge rapidly.">?</span>',
     )
 
     mo.vstack([
