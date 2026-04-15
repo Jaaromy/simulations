@@ -44,14 +44,18 @@ def _(mo):
 @app.cell
 def _(mo, n_links_slider):
     def _default_ic_text(n: int) -> str:
-        # Angles alternate sign and halve each link: 120, -60, 30, -15, 7.5
-        _base = [round(120.0 * ((-0.5) ** i), 1) for i in range(n)]
+        # Near unstable equilibrium (pointing up = 180°) with tiny perturbations
+        _base = [180.0] * n
         _fmt = lambda angles: ", ".join(str(a) for a in angles)
-        _p1 = _base.copy(); _p1[0] = round(_p1[0] + 0.2, 1)
-        _p2 = _base.copy(); _p2[0] = round(_p2[0] - 0.2, 1)
-        if n > 1:
-            _p2[1] = round(_p2[1] - 0.1, 1)
-        return f"{_fmt(_base)}\n{_fmt(_p1)}\n{_fmt(_p2)}\n"
+        def _perturb(i, delta):
+            r = _base.copy()
+            if i < n:
+                r[i] = round(r[i] + delta, 1)
+            return r
+        _lines = [_perturb(0, 0.1), _perturb(1, 0.1), _perturb(0, 0.2), _perturb(1, 0.2), _perturb(0, 0.3)]
+        if n == 1:
+            _lines = [_perturb(0, 0.1), _perturb(0, 0.2), _perturb(0, 0.3)]
+        return "\n".join(_fmt(l) for l in _lines) + "\n"
 
     ic_textarea = mo.ui.text_area(
         value=_default_ic_text(n_links_slider.value),
