@@ -23,6 +23,51 @@ def _():
 
 @app.cell
 def _(mo):
+    mo.Html("""<style>
+.tip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  cursor: help;
+  color: #6b7280;
+  font-size: 0.7em;
+  border: 1px solid #9ca3af;
+  border-radius: 50%;
+  width: 1.5em;
+  height: 1.5em;
+  margin-left: 4px;
+  vertical-align: middle;
+  font-style: normal;
+  user-select: none;
+}
+.tip::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1f2937;
+  color: #f9fafb;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 1.2rem;
+  width: 240px;
+  white-space: normal;
+  line-height: 1.4;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+  z-index: 9999;
+  text-align: left;
+}
+.tip:hover::after { opacity: 1; }
+</style>""")
+    return
+
+
+@app.cell
+def _(mo):
     mo.md("# Ising Model — 2D Phase Transition")
     return
 
@@ -31,20 +76,20 @@ def _(mo):
 def _(mo):
     temperature = mo.ui.slider(
         start=0.5, stop=5.0, step=0.05, value=2.0,
-        label='Temperature T <abbr title="In units where J=1, k_B=1. Critical temperature Tc ≈ 2.27. Below Tc: ordered (large domains). Above Tc: disordered (random noise).">[?]</abbr>',
+        label='Temperature T <span class="tip" data-tip="In units where J=1, k_B=1. Critical temperature Tc ≈ 2.27. Below Tc: ordered (large domains). Above Tc: disordered (random noise).">?</span>',
     )
     grid_size = mo.ui.slider(
         start=20, stop=100, step=5, value=50,
-        label='Grid Size L <abbr title="Lattice is L×L spins. Larger grids show cleaner domain structure and sharper phase transition, but run slower.">[?]</abbr>',
+        label='Grid Size L <span class="tip" data-tip="Lattice is L×L spins. Larger grids show cleaner domain structure and sharper phase transition, but run slower.">?</span>',
     )
     n_sweeps = mo.ui.slider(
         start=100, stop=5000, step=100, value=1000,
-        label='Sweeps <abbr title="One sweep = L² Metropolis flip attempts. More sweeps give better equilibration and smoother magnetisation trajectory.">[?]</abbr>',
+        label='Sweeps <span class="tip" data-tip="One sweep = L² Metropolis flip attempts. More sweeps give better equilibration and smoother magnetisation trajectory.">?</span>',
     )
     initial_state = mo.ui.dropdown(
         options=["random", "aligned_up", "aligned_down"],
         value="random",
-        label='Initial state <abbr title="random: start disordered. aligned_up/down: start fully magnetised (faster equilibration in ordered phase).">[?]</abbr>',
+        label='Initial state <span class="tip" data-tip="random: start disordered. aligned_up/down: start fully magnetised (faster equilibration in ordered phase).">?</span>',
     )
     mo.vstack([
         mo.hstack([temperature, grid_size], justify="center"),

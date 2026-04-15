@@ -26,6 +26,51 @@ def _():
 
 @app.cell
 def _(mo):
+    mo.Html("""<style>
+.tip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  cursor: help;
+  color: #6b7280;
+  font-size: 0.7em;
+  border: 1px solid #9ca3af;
+  border-radius: 50%;
+  width: 1.5em;
+  height: 1.5em;
+  margin-left: 4px;
+  vertical-align: middle;
+  font-style: normal;
+  user-select: none;
+}
+.tip::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1f2937;
+  color: #f9fafb;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 1.2rem;
+  width: 240px;
+  white-space: normal;
+  line-height: 1.4;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+  z-index: 9999;
+  text-align: left;
+}
+.tip:hover::after { opacity: 1; }
+</style>""")
+    return
+
+
+@app.cell
+def _(mo):
     mo.md("""
     # Casino Simulation Comparison
     """)
@@ -44,31 +89,31 @@ def _(mo):
 def _(mo):
     n_rounds = mo.ui.slider(
         start=100, stop=500_000, step=100, value=1_000,
-        label='Rounds / Hands / Spins <abbr title="How many rounds each player plays per run. More rounds let the house edge grind the bankroll; short sessions show high variance.">[?]</abbr>',
+        label='Rounds / Hands / Spins <span class="tip" data-tip="How many rounds each player plays per run. More rounds let the house edge grind the bankroll; short sessions show high variance.">?</span>',
     )
     initial_bankroll = mo.ui.number(
         start=100, stop=10000, step=100, value=1000,
-        label='Initial Bankroll ($) <abbr title="Starting funds per simulated player (dashed line on chart). Smaller bankrolls ruin faster against the same house edge.">[?]</abbr>',
+        label='Initial Bankroll ($) <span class="tip" data-tip="Starting funds per simulated player (dashed line on chart). Smaller bankrolls ruin faster against the same house edge.">?</span>',
     )
     bet_size = mo.ui.number(
         start=1, stop=200, step=1, value=10,
-        label='Bet Size ($) <abbr title="Flat bet per round. Expected loss per round = bet_size × house_edge. Larger bets amplify both wins and losses proportionally.">[?]</abbr>',
+        label='Bet Size ($) <span class="tip" data-tip="Flat bet per round. Expected loss per round = bet_size × house_edge. Larger bets amplify both wins and losses proportionally.">?</span>',
     )
     n_runs = mo.ui.slider(
         start=1, stop=50, step=1, value=10,
-        label='Simulation Runs (per game) <abbr title="Independent player trajectories per game. More runs narrow the mean estimate and expose ruin probability.">[?]</abbr>',
+        label='Simulation Runs (per game) <span class="tip" data-tip="Independent player trajectories per game. More runs narrow the mean estimate and expose ruin probability.">?</span>',
     )
     use_basic_strategy = mo.ui.checkbox(
         value=True,
-        label='Blackjack: Use Basic Strategy <abbr title="Optimal hit/stand/double/split for every hand. Cuts house edge from ~2% (guessing) to ~0.5%.">[?]</abbr>',
+        label='Blackjack: Use Basic Strategy <span class="tip" data-tip="Optimal hit/stand/double/split for every hand. Cuts house edge from ~2% (guessing) to ~0.5%.">?</span>',
     )
     use_hilo = mo.ui.checkbox(
         value=False,
-        label='Blackjack: Hi/Lo Card Counting (requires basic strategy) <abbr title="Track high vs low cards remaining. Raise bets when count favours the player. Requires basic strategy; can flip edge slightly positive at high counts.">[?]</abbr>',
+        label='Blackjack: Hi/Lo Card Counting (requires basic strategy) <span class="tip" data-tip="Track high vs low cards remaining. Raise bets when count favours the player. Requires basic strategy; can flip edge slightly positive at high counts.">?</span>',
     )
     hilo_max_bet_units = mo.ui.slider(
         start=2, stop=16, step=1, value=8,
-        label='Hi/Lo Max Bet Units <abbr title="Bet ceiling as a multiple of base bet when count is strongly positive. Higher spread = more edge but more variance.">[?]</abbr>',
+        label='Hi/Lo Max Bet Units <span class="tip" data-tip="Bet ceiling as a multiple of base bet when count is strongly positive. Higher spread = more edge but more variance.">?</span>',
     )
     run_button = mo.ui.run_button(label="Run simulation")
 

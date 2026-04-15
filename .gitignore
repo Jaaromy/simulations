@@ -211,3 +211,4 @@ _site/
 
 # Claude Code local settings
 .claude/
+.worktrees/
