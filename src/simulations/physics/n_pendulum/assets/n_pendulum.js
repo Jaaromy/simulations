@@ -327,14 +327,14 @@ function drawFrame(ctx, canvas, pendulumStates, config, trails) {
     ctx.beginPath();
     ctx.moveTo(cx, cy);
     for (var k = 0; k < N; k++) {
-      ctx.lineTo(cx + pos.x[k] * scale, cy - pos.y[k] * scale);
+      ctx.lineTo(cx + pos.x[k] * scale, cy + pos.y[k] * scale);
     }
     ctx.stroke();
 
     // Draw bobs
     for (var k = 0; k < N; k++) {
       var bx = cx + pos.x[k] * scale;
-      var by = cy - pos.y[k] * scale;
+      var by = cy + pos.y[k] * scale;
       var radius = (k === N - 1) ? OUTERMOST_BOB_RADIUS : BOB_RADIUS;
       ctx.fillStyle = bobColor;
       ctx.beginPath();
@@ -457,7 +457,7 @@ function start(config) {
       var s = extractState(states[p]);
       var pos = cartesianPositions(s.thetas, config.lengths);
       var outerX = cx + pos.x[N - 1] * config.scalePxPerM;
-      var outerY = cy - pos.y[N - 1] * config.scalePxPerM;
+      var outerY = cy + pos.y[N - 1] * config.scalePxPerM;
       ringBufferPush(trails[p], [outerX, outerY]);
 
       // Store for getTrajectory
