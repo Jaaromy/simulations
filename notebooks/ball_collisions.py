@@ -23,6 +23,51 @@ def _():
 
 @app.cell
 def _(mo):
+    mo.Html("""<style>
+.tip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  cursor: help;
+  color: #6b7280;
+  font-size: 0.7em;
+  border: 1px solid #9ca3af;
+  border-radius: 50%;
+  width: 1.5em;
+  height: 1.5em;
+  margin-left: 4px;
+  vertical-align: middle;
+  font-style: normal;
+  user-select: none;
+}
+.tip::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1f2937;
+  color: #f9fafb;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 1.2rem;
+  width: 240px;
+  white-space: normal;
+  line-height: 1.4;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+  z-index: 9999;
+  text-align: left;
+}
+.tip:hover::after { opacity: 1; }
+</style>""")
+    return
+
+
+@app.cell
+def _(mo):
     mo.md("""
     # 2D Ball Collisions
 
@@ -36,35 +81,35 @@ def _(mo):
 def _(mo):
     n_balls_slider = mo.ui.slider(
         start=1, stop=80, step=1, value=15,
-        label='Balls <abbr title="Number of balls in the simulation. More balls → more collisions; above ~60 the canvas gets crowded.">[?]</abbr>',
+        label='Balls <span class="tip" data-tip="Number of balls in the simulation. More balls → more collisions; above ~60 the canvas gets crowded.">?</span>',
     )
     friction_slider = mo.ui.slider(
         start=0.0, stop=1.0, step=0.01, value=0.05,
-        label='Friction <abbr title="Coulomb surface friction coefficient. 0 = frictionless ice; 1 = maximum grip. Applied at contact between balls and walls.">[?]</abbr>',
+        label='Friction <span class="tip" data-tip="Coulomb surface friction coefficient. 0 = frictionless ice; 1 = maximum grip. Applied at contact between balls and walls.">?</span>',
     )
     friction_air_slider = mo.ui.slider(
         start=0.0, stop=0.1, step=0.001, value=0.005,
-        label='Air drag <abbr title="Air resistance coefficient applied every tick. 0 = vacuum (no drag); 0.1 = strong drag. Independent of surface friction.">[?]</abbr>',
+        label='Air drag <span class="tip" data-tip="Air resistance coefficient applied every tick. 0 = vacuum (no drag); 0.1 = strong drag. Independent of surface friction.">?</span>',
     )
     restitution_slider = mo.ui.slider(
         start=0.0, stop=1.0, step=0.01, value=0.8,
-        label='Restitution <abbr title="Coefficient of restitution (bounciness). 0 = perfectly inelastic (balls stick on impact); 1 = perfectly elastic (no kinetic energy lost).">[?]</abbr>',
+        label='Restitution <span class="tip" data-tip="Coefficient of restitution (bounciness). 0 = perfectly inelastic (balls stick on impact); 1 = perfectly elastic (no kinetic energy lost).">?</span>',
     )
     speed_slider = mo.ui.slider(
         start=0.0, stop=20.0, step=0.5, value=6.0,
-        label='Initial speed <abbr title="Speed of each ball at launch (pixels per engine tick, ~60 Hz). 0 = balls start at rest.">[?]</abbr>',
+        label='Initial speed <span class="tip" data-tip="Speed of each ball at launch (pixels per engine tick, ~60 Hz). 0 = balls start at rest.">?</span>',
     )
     gravity_slider = mo.ui.slider(
         start=0.0, stop=3.0, step=0.05, value=1.0,
-        label='Gravity <abbr title="Vertical gravity scale. 0 = zero-g / billiards mode; 1 = Earth-like; 3 = strong pull.">[?]</abbr>',
+        label='Gravity <span class="tip" data-tip="Vertical gravity scale. 0 = zero-g / billiards mode; 1 = Earth-like; 3 = strong pull.">?</span>',
     )
     mass_max_slider = mo.ui.slider(
         start=1.0, stop=10.0, step=0.5, value=5.0,
-        label='Max mass <abbr title="Upper bound of the uniform mass range [1, max]. Ball radius is proportional to mass. Heavier balls are darker purple.">[?]</abbr>',
+        label='Max mass <span class="tip" data-tip="Upper bound of the uniform mass range [1, max]. Ball radius is proportional to mass. Heavier balls are darker purple.">?</span>',
     )
     vectors_toggle = mo.ui.checkbox(
         value=False,
-        label='Velocity vectors <abbr title="Draw yellow arrows showing each ball\'s current velocity. Arrow length scales with speed.">[?]</abbr>',
+        label='Velocity vectors <span class="tip" data-tip="Draw yellow arrows showing each ball\'s current velocity. Arrow length scales with speed.">?</span>',
     )
 
     mo.vstack([
