@@ -132,6 +132,44 @@ function simulate(config, nSteps) {
   return snapshots;
 }
 
+// Returns the number of substeps needed so each substep is ≤ 5% of the
+// dynamical timescale t_dyn = sqrt(r³ / G(mᵢ+mⱼ)) for the closest live pair.
+function requiredSubsteps(bodies, G, dtS, softeningM, baseSubsteps) {
+  let maxRatio = 1;
+  for (let i = 0; i < bodies.length; i++) {
+    if (!bodies[i].alive) continue;
+    for (let j = i + 1; j < bodies.length; j++) {
+      if (!bodies[j].alive) continue;
+      const dx = bodies[j].x - bodies[i].x;
+      const dy = bodies[j].y - bodies[i].y;
+      const r2 = dx * dx + dy * dy + softeningM * softeningM;
+      const r = Math.sqrt(r2);
+      const tDyn = Math.sqrt(r * r2 / (G * (bodies[i].mass + bodies[j].mass)));
+      const ratio = dtS / tDyn;
+      if (ratio > maxRatio) maxRatio = ratio;
+    }
+  }
+  // Each substep should be ≤ 5% of t_dyn
+  return Math.min(Math.max(baseSubsteps, Math.ceil(maxRatio / 0.05)), 100000);
+}
+
+function computeTotalEnergy(bodies, G, softeningM) {
+  const eps2 = softeningM * softeningM;
+  let KE = 0, PE = 0;
+  for (let i = 0; i < bodies.length; i++) {
+    if (!bodies[i].alive) continue;
+    KE += 0.5 * bodies[i].mass * (bodies[i].vx * bodies[i].vx + bodies[i].vy * bodies[i].vy);
+    for (let j = i + 1; j < bodies.length; j++) {
+      if (!bodies[j].alive) continue;
+      const dx = bodies[j].x - bodies[i].x;
+      const dy = bodies[j].y - bodies[i].y;
+      const dist = Math.sqrt(dx * dx + dy * dy + eps2);
+      PE -= G * bodies[i].mass * bodies[j].mass / dist;
+    }
+  }
+  return KE + PE;
+}
+
 // ─── Browser renderer ─────────────────────────────────────────────────────────
 
 (function () {
@@ -209,25 +247,63 @@ function simulate(config, nSteps) {
 
     const metersPerPixel = (config.viewScaleAu * AU * 2) / config.canvasWidth;
     const substeps = config.substeps || 1;
-    const dtSub = config.dtS / substeps;
     const timeWarp = config.timeWarp || 1;
+
+    let initialEnergy = null;
+    let currentEnergyDrift = 0;
+    let currentSubsteps = substeps;
 
     // ── Controls UI ──
     injectControls(canvas, config, bodies);
 
     // ── Animation loop ──
-    function frame() {
-      animId = requestAnimationFrame(frame);
-      if (paused) return;
+    let lastTimestamp = null;
 
-      // Run substeps × timeWarp physics ticks per frame
-      const ticks = substeps * timeWarp;
-      for (let t = 0; t < ticks; t++) {
-        const subCfg = Object.assign({}, config, { dtS: dtSub });
-        const newState = step({ bodies }, subCfg);
+    function frame(timestamp) {
+      animId = requestAnimationFrame(frame);
+      if (paused) { lastTimestamp = null; return; }
+
+      // Real seconds elapsed since last frame (cap at 0.1s to avoid spiral-of-death)
+      const frameDt = lastTimestamp !== null
+        ? Math.min((timestamp - lastTimestamp) / 1000, 0.1)
+        : 1 / 60;
+      lastTimestamp = timestamp;
+
+      if (initialEnergy === null) {
+        initialEnergy = computeTotalEnergy(bodies, config.G, config.softeningM);
+      }
+
+      // Advance simulation with adaptive per-step timestepping.
+      // Recompute substeps each integration step so close approaches developing
+      // mid-frame are caught before energy error accumulates.
+      const simSecondsNeeded = timeWarp * frameDt;
+      const MAX_STEPS_PER_FRAME = 5000; // prevents browser stall
+      let simTimeElapsed = 0;
+      let stepsDone = 0;
+
+      while (simTimeElapsed < simSecondsNeeded - 1e-9 && stepsDone < MAX_STEPS_PER_FRAME) {
+        currentSubsteps = requiredSubsteps(bodies, config.G, config.dtS, config.softeningM, substeps);
+        const dtStep = Math.min(
+          config.dtS / currentSubsteps,
+          simSecondsNeeded - simTimeElapsed,
+        );
+        const aliveBefore = bodies.reduce((n, b) => n + (b.alive ? 1 : 0), 0);
+        const stepCfg = Object.assign({}, config, { dtS: dtStep });
+        const newState = step({ bodies }, stepCfg);
         for (let i = 0; i < bodies.length; i++) {
           Object.assign(bodies[i], newState.bodies[i]);
         }
+        // Inelastic merge intentionally loses KE — reset energy baseline so drift
+        // meter tracks only numerical error from the post-merge state onward.
+        const aliveAfter = bodies.reduce((n, b) => n + (b.alive ? 1 : 0), 0);
+        if (aliveAfter !== aliveBefore) initialEnergy = null;
+        simTimeElapsed += dtStep;
+        stepsDone++;
+      }
+
+      if (initialEnergy !== null && initialEnergy !== 0) {
+        const E = computeTotalEnergy(bodies, config.G, config.softeningM);
+        currentEnergyDrift = (E - initialEnergy) / Math.abs(initialEnergy) * 100;
       }
 
       // Update trails
@@ -279,9 +355,57 @@ function simulate(config, nSteps) {
         }
       }
 
+      // Accuracy-limited warning (step budget exhausted this frame)
+      if (stepsDone >= MAX_STEPS_PER_FRAME) {
+        ctx.font = '11px monospace';
+        ctx.textAlign = 'left';
+        ctx.fillStyle = '#000010cc';
+        const warnText = '⚠ slowing for accuracy';
+        const ww = ctx.measureText(warnText).width;
+        ctx.fillRect(8, 6, ww + 10, 18);
+        ctx.fillStyle = '#ffcc00';
+        ctx.fillText(warnText, 13, 19);
+      }
+
+      // Energy drift + substep overlay
+      if (initialEnergy !== null) {
+        const absDrift = Math.abs(currentEnergyDrift);
+        const driftColor = absDrift < 0.1 ? '#44ff88' : absDrift < 1.0 ? '#ffcc00' : '#ff4444';
+        const driftLabel = absDrift < 0.1
+          ? `ΔE/E₀: ${currentEnergyDrift.toFixed(3)}%`
+          : absDrift < 1.0
+          ? `ΔE/E₀: ${currentEnergyDrift.toFixed(2)}% ⚠`
+          : `ΔE/E₀: ${currentEnergyDrift.toFixed(1)}% ✕`;
+        const subLabel = `sub: ${currentSubsteps}`;
+        ctx.font = '11px monospace';
+        ctx.textAlign = 'right';
+        // drift line
+        ctx.fillStyle = '#000010cc';
+        const tw1 = ctx.measureText(driftLabel).width;
+        ctx.fillRect(canvas.width - tw1 - 14, 6, tw1 + 10, 18);
+        ctx.fillStyle = driftColor;
+        ctx.fillText(driftLabel, canvas.width - 8, 19);
+        // substep line
+        const tw2 = ctx.measureText(subLabel).width;
+        ctx.fillStyle = '#000010cc';
+        ctx.fillRect(canvas.width - tw2 - 14, 26, tw2 + 10, 18);
+        ctx.fillStyle = currentSubsteps > substeps ? '#ffcc00' : '#888888';
+        ctx.fillText(subLabel, canvas.width - 8, 39);
+      }
+
       // Draw drag arrow if active
       if (dragState.active) {
         const sp = worldToCanvas(dragState.wx, dragState.wy, camX, camY, metersPerPixel, canvas.width, canvas.height);
+        // Preview circle showing body's rendered size
+        const _massInput = document.getElementById('nbody-mass-input');
+        const _massEarths = _massInput ? parseFloat(_massInput.value) || 1.0 : 1.0;
+        const previewR = displayRadius(EARTH_RADIUS_M * Math.cbrt(_massEarths), config.logRadiusScale, metersPerPixel);
+        ctx.beginPath();
+        ctx.arc(sp.px, sp.py, previewR, 0, Math.PI * 2);
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        // Velocity arrow
         ctx.beginPath();
         ctx.strokeStyle = '#ffffff';
         ctx.lineWidth = 2;
@@ -302,7 +426,7 @@ function simulate(config, nSteps) {
     }
 
     // ── Click-drag to add body ──
-    const VELOCITY_SCALE = (AU * 2 / config.canvasWidth) * (30000 / 100);
+    const VELOCITY_SCALE = 30000 / 100; // 300 m/s per pixel of drag → 100 px ≈ Earth orbital speed
     const dragState = { active: false, wx: 0, wy: 0, ex: 0, ey: 0 };
 
     function canvasToWorld(px, py, camX, camY) {
@@ -342,7 +466,7 @@ function simulate(config, nSteps) {
       const startWorld = { wx: dragState.wx, wy: dragState.wy };
       const endWorld = canvasToWorld(cpx, cpy, camX, camY);
       const dvx = (endWorld.wx - startWorld.wx) * VELOCITY_SCALE / metersPerPixel;
-      const dvy = -(endWorld.wy - startWorld.wy) * VELOCITY_SCALE / metersPerPixel;
+      const dvy = (endWorld.wy - startWorld.wy) * VELOCITY_SCALE / metersPerPixel;
 
       const massInput = document.getElementById('nbody-mass-input');
       const massEarths = massInput ? parseFloat(massInput.value) || 1.0 : 1.0;

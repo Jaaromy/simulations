@@ -105,7 +105,7 @@ class GravityParams:
 
     bodies: list[BodyIC] = field(default_factory=solar_system_preset)
     G: float = _G
-    softening_m: float = 1e9
+    softening_m: float = 1e7
     dt_s: float = 3600.0
     substeps: int = 4
     time_warp: float = 86400.0

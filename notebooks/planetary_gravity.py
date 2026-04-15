@@ -78,7 +78,7 @@ def _(mo, preset_dropdown):
         _G = 6.67430e-11
         _M = 1.989e30
         _scale = 1.5e11
-        _vscale = 20000.0
+        _vscale = math.sqrt(_G * _M / _scale)  # ~29744 m/s — self-consistent with G, M, scale
         return [
             BodyIC("Body A", _M, -0.97000436*_scale,  0.24308753*_scale,  0.93240737/2*_vscale,  0.86473146/2*_vscale, 6.957e8, "#FF6B6B"),
             BodyIC("Body B", _M,  0.97000436*_scale, -0.24308753*_scale,  0.93240737/2*_vscale,  0.86473146/2*_vscale, 6.957e8, "#4ECDC4"),
@@ -153,7 +153,8 @@ def _(
         merge_enabled=merge_toggle.value,
         view_center=view_center_dropdown.value,
     )
-    return mo.hstack([mo.Html(build_gravity_html(_params))], justify="center")
+    mo.hstack([mo.Html(build_gravity_html(_params))], justify="center")
+    return
 
 
 @app.cell
